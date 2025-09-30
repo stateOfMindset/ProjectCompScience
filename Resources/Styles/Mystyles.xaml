@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<?xaml-comp compile="true" ?>
+<ResourceDictionary 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <Style TargetType="Entry" x:Key="EnRegister">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="BackgroundColor" Value="Snow"/>
+        <Setter Property="PlaceholderColor" Value="HotPink"/>
+    </Style>
+
+    <Style TargetType="Button" x:Key="RegisterPageButtons">
+        <Setter Property="BackgroundColor" Value="Plum"></Setter>
+    </Style>
+
+    <LinearGradientBrush x:Key="PageBackgroundGradient" StartPoint="1,1" EndPoint="0,0">
+        <GradientStop Color="LightCoral" Offset="0.0" />
+        <GradientStop Color="#EE0979" Offset="1.0" />
+    </LinearGradientBrush>
+
+    <!-- Define a style for ContentPage using that brush -->
+    <Style TargetType="ContentPage" x:Key="GradientPageStyle">
+        <Setter Property="Background" Value="{StaticResource PageBackgroundGradient}" />
+    </Style>
+
+
+</ResourceDictionary>

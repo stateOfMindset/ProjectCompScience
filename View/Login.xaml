@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ProjectCompScience.View.Login"
+             Title="Login">
+    <ScrollView>
+        <VerticalStackLayout Spacing="25" VerticalOptions="Center">
+
+            <Label Text="Welcome Back!"
+                   FontSize="36"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center"
+                   TextColor="#222"/>
+
+            <!-- Email -->
+            <Frame HasShadow="True" CornerRadius="15" Padding="15" BackgroundColor="White" HeightRequest="60">
+                <Entry x:Name="EmailEntry"
+                       Placeholder="Email"
+                       Keyboard="Email"
+                       BackgroundColor="Transparent"
+                       TextColor="#222"
+                       PlaceholderColor="#aaa"
+                       FontSize="16" />
+            </Frame>
+
+            <!-- Password with toggle -->
+            <Frame HasShadow="True" CornerRadius="15" Padding="10,0" BackgroundColor="White" HeightRequest="60">
+                <Grid>
+                    <Entry x:Name="PasswordEntry"
+                           Placeholder="Password"
+                           IsPassword="True"
+                           BackgroundColor="Transparent"
+                           TextColor="#222"
+                           PlaceholderColor="#aaa"
+                           FontSize="16"
+                           VerticalOptions="Center"
+                           Margin="10,0,40,0"/>
+                    <Button x:Name="TogglePasswordBtn"
+                            Text="Show"
+                            FontAttributes="Bold"
+                            BackgroundColor="Transparent"
+                            TextColor="#5e60ce"
+                            VerticalOptions="Center"
+                            HorizontalOptions="End"
+                            WidthRequest="50"
+                            Clicked="OnTogglePasswordClicked"/>
+                </Grid>
+            </Frame>
+
+            <!-- Login Button -->
+            <Button Text="Login"
+                    x:Name="LoginButton"
+                    BackgroundColor="#5e60ce"
+                    TextColor="White"
+                    FontAttributes="Bold"
+                    HeightRequest="55"
+                    CornerRadius="15"
+                    Clicked="OnLoginClicked" />
+
+            <!-- Forgot Password & Register -->
+            <HorizontalStackLayout Spacing="10" HorizontalOptions="Center" VerticalOptions="EndAndExpand">
+                <Button Text="Forgot Password?"
+                        BackgroundColor="Transparent"
+                        TextColor="#5e60ce"
+                        FontAttributes="Bold"
+                        Clicked="OnForgotPasswordClicked" />
+                <Button Text="Register"
+                        BackgroundColor="Transparent"
+                        TextColor="#5e60ce"
+                        FontAttributes="Bold"
+                        Clicked="OnRegisterClicked" />
+            </HorizontalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

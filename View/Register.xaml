@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ProjectCompScience.View.Register"
+             Style="{StaticResource GradientPageStyle}"
+             Title="Register">
+    <ScrollView>
+        <VerticalStackLayout Padding="30" Spacing="25" WidthRequest="480" HorizontalOptions="Center">
+
+            <!-- Name -->
+
+            <Entry x:Name="NameEntry" Placeholder="Name" FontSize="Medium" Style="{StaticResource EnRegister}" />
+            <Label x:Name="NameErrorLabel" TextColor="Red" IsVisible="False" FontSize="Medium" Text="Name is required" />
+
+            <!-- Email -->
+
+            <Entry x:Name="EmailEntry" Placeholder="Email" Keyboard="Email" FontSize="Medium" Style="{StaticResource EnRegister}" />
+            <Label x:Name="EmailErrorLabel" TextColor="Red" IsVisible="False" FontSize="Medium" Text="Invalid email address" />
+
+            <!-- Password -->
+            <Grid ColumnDefinitions="*,Auto">
+                <Entry
+                    Style="{StaticResource EnRegister}"
+                    x:Name="PasswordEntry"
+                    Grid.Column="0"
+                    IsPassword="True"
+                    Placeholder="Enter Password"
+                />
+                <Button
+                    Style="{StaticResource RegisterPageButtons}"
+                    Grid.Column="1"
+                    Clicked="OnToggleConfirmPasswordClicked"
+                    Text="👀"
+                />
+
+            </Grid>
+
+            <Label x:Name="PasswordErrorLabel" TextColor="Red" IsVisible="False" FontSize="Medium" Text="Password must be at least 6 chars long" />
+
+            <Grid ColumnDefinitions="*,Auto">
+                <Entry
+                    Style="{StaticResource EnRegister}"
+                    x:Name="ConfirmPasswordEntry"
+                    Grid.Column="0"
+                    IsPassword="True"
+                    Placeholder="Confirm Password"
+                />
+                <Button
+                    Style="{StaticResource RegisterPageButtons}"
+                    Grid.Column="1"
+                    Clicked="OnToggleConfirmPasswordClicked"
+                    Text="👀"
+                />
+
+            </Grid>
+
+            <Label x:Name="ConfirmPasswordErrorLabel" TextColor="Red" IsVisible="False" FontSize="Medium" Text="Passwords do not match" />
+
+            <!-- Register Button -->
+            <Button Text="Register"
+                    Style="{StaticResource RegisterPageButtons}"
+                    Clicked="OnRegisterClicked" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
