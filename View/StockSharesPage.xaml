@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ProjectCompScience.View.StockSharesPage"
+             Title="StockSharesPage"
+             xmlns:models="clr-namespace:ProjectCompScience.Models">
+                
+    <VerticalStackLayout>
+        <Label
+            HorizontalOptions="Center"
+            Text="Shares..."
+            VerticalOptions="Center" />
+        <CollectionView ItemsSource="{Binding Shares}">
+            <CollectionView.EmptyView>
+                <Label HorizontalTextAlignment="Center" Text="No Shares To Show !" />
+            </CollectionView.EmptyView>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:StockShare">
+                    <Border StrokeThickness="1">
+                        <StackLayout Padding="10" BackgroundColor="LightGray">
+                            <Label FontAttributes="Bold" Text="{Binding Company.CompanyName}" />
+                            <Label Text="{Binding price}" />
+                            <Grid>
+                                <Ellipse
+                                    Fill="Red"
+                                    HeightRequest="30"
+                                    HorizontalOptions="Center"
+                                    VerticalOptions="Center"
+                                    WidthRequest="30" />
+                                <Label
+                                    FontSize="12"
+                                    HorizontalOptions="Center"
+                                    Text="{Binding quantity}"
+                                    TextColor="White"
+                                    VerticalOptions="Center" />
+                            </Grid>
+                        </StackLayout>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </VerticalStackLayout>
+</ContentPage>

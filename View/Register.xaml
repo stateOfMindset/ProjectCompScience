@@ -5,61 +5,91 @@
              Style="{StaticResource GradientPageStyle}"
              Title="Register">
     <ScrollView>
-        <VerticalStackLayout Padding="30" Spacing="25" WidthRequest="480" HorizontalOptions="Center">
+        <Frame Style="{StaticResource FrameRegister}">
+            <Frame.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="Orange" Offset="0.0" />
+                    <GradientStop Color="Gold" Offset="0.05" />
+                    <GradientStop Color="Orange" Offset="0.1" />
+                    <GradientStop Color="Gold" Offset="0.15" />
+                    <GradientStop Color="Orange" Offset="0.2" />
+                    <GradientStop Color="Gold" Offset="0.25" />
+                    <GradientStop Color="Orange" Offset="0.3" />
+                    <GradientStop Color="Gold" Offset="0.35" />
+                    <GradientStop Color="Orange" Offset="0.4" />
+                    <GradientStop Color="Gold" Offset="0.45" />
+                    <GradientStop Color="Orange" Offset="0.5" />
+                    <GradientStop Color="Gold" Offset="0.55" />
+                    <GradientStop Color="Orange" Offset="0.6" />
+                    <GradientStop Color="Gold" Offset="0.65" />
+                    <GradientStop Color="Orange" Offset="0.7" />
+                    <GradientStop Color="Gold" Offset="0.75" />
+                    <GradientStop Color="Orange" Offset="0.8" />
+                    <GradientStop Color="Gold" Offset="0.85" />
+                    <GradientStop Color="Orange" Offset="0.9" />
+                    <GradientStop Color="Gold" Offset="0.95" />
+                    <GradientStop Color="Orange" Offset="1" />
+                </LinearGradientBrush>
+            </Frame.Background>
+            <VerticalStackLayout Padding="30" Spacing="25" WidthRequest="480" HorizontalOptions="Center">
 
-            <!-- Name -->
+                <!-- Name -->
 
-            <Entry x:Name="NameEntry" Placeholder="Name" FontSize="Medium" Style="{StaticResource EnRegister}" />
-            <Label x:Name="NameErrorLabel" TextColor="Red" IsVisible="False" FontSize="Medium" Text="Name is required" />
+                <Entry Text="{Binding NameField}" Placeholder="Name" Style="{StaticResource EnRegister}" />
+                <Label Text="{Binding ErrorLabelNameText}"  Style="{StaticResource ErrorLabelStyle}"/>
 
-            <!-- Email -->
+                <!-- Email -->
 
-            <Entry x:Name="EmailEntry" Placeholder="Email" Keyboard="Email" FontSize="Medium" Style="{StaticResource EnRegister}" />
-            <Label x:Name="EmailErrorLabel" TextColor="Red" IsVisible="False" FontSize="Medium" Text="Invalid email address" />
+                <Entry Placeholder="Email" Text="{Binding EmailFieldText}" Style="{StaticResource EnRegister}" />
+                <Label Text="{Binding ErrorLabelEmailField}" Style="{StaticResource ErrorLabelStyle}" />
 
-            <!-- Password -->
-            <Grid ColumnDefinitions="*,Auto">
-                <Entry
+                <!-- Password -->
+                <Grid ColumnDefinitions="*,Auto">
+                    <Entry
                     Style="{StaticResource EnRegister}"
-                    x:Name="PasswordEntry"
                     Grid.Column="0"
-                    IsPassword="True"
+                    IsPassword ="{Binding IsVisiblePasswordField}"
                     Placeholder="Enter Password"
+                    Text="{Binding PasswordField}"
+                    
                 />
-                <Button
+                    <Button
                     Style="{StaticResource RegisterPageButtons}"
                     Grid.Column="1"
-                    Clicked="OnToggleConfirmPasswordClicked"
+                    Command="{Binding ButtonShowPasswordCommand}"
+   
                     Text="👀"
                 />
 
-            </Grid>
+                </Grid>
 
-            <Label x:Name="PasswordErrorLabel" TextColor="Red" IsVisible="False" FontSize="Medium" Text="Password must be at least 6 chars long" />
+                <Label Style="{StaticResource ErrorLabelStyle}" Text="{Binding ErrorLabelPasswordField}" />
 
-            <Grid ColumnDefinitions="*,Auto">
-                <Entry
+                <Grid ColumnDefinitions="*,Auto">
+                    <Entry
                     Style="{StaticResource EnRegister}"
-                    x:Name="ConfirmPasswordEntry"
+                   Text="{Binding ConfirmPasswordField}"
                     Grid.Column="0"
-                    IsPassword="True"
+                    IsPassword="{Binding IsVisibleConfirmPasswordField}"                 
                     Placeholder="Confirm Password"
                 />
-                <Button
+                    <Button
                     Style="{StaticResource RegisterPageButtons}"
                     Grid.Column="1"
-                    Clicked="OnToggleConfirmPasswordClicked"
+                    Command="{Binding ButtonShowConfirmPasswordCommand}"                
                     Text="👀"
                 />
 
-            </Grid>
+                </Grid>
 
-            <Label x:Name="ConfirmPasswordErrorLabel" TextColor="Red" IsVisible="False" FontSize="Medium" Text="Passwords do not match" />
+                <Label Text="{Binding ErrorLabelConfirmPasswordField}" Style="{StaticResource ErrorLabelStyle}" />
 
-            <!-- Register Button -->
-            <Button Text="Register"
+                <!-- Register Button -->
+                <Button Text="Register"
                     Style="{StaticResource RegisterPageButtons}"
-                    Clicked="OnRegisterClicked" />
-        </VerticalStackLayout>
+                    Command="{Binding ButtonRegisterCommand}"
+                   ></Button>
+            </VerticalStackLayout>
+        </Frame>
     </ScrollView>
 </ContentPage>

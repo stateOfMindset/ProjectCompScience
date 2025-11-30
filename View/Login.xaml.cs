@@ -1,5 +1,7 @@
 namespace ProjectCompScience.View;
 
+using ProjectCompScience.ViewModels;
+
 public partial class Login : ContentPage
 {
     bool isPasswordVisible = false;
@@ -7,6 +9,7 @@ public partial class Login : ContentPage
     public Login()
     {
         InitializeComponent();
+        BindingContext = new ViewModelRegister();
     }
 
     private void OnTogglePasswordClicked(object sender, EventArgs e)

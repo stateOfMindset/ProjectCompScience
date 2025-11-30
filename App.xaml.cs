@@ -8,7 +8,7 @@ namespace ProjectCompScience
         {
             InitializeComponent();
 
-            MainPage = new Login();
+            MainPage = new StockSharesPage();
         }
     }
 }
