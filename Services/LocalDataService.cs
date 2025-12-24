@@ -24,7 +24,7 @@ namespace ProjectCompScience.Services
 
         #endregion
 
-        public List<StockShare> stockShares = new List<StockShare>();
+        public static List<StockShare> stockShares = new List<StockShare>();
         private void CreateFakeData()
         {
             StockShare ss1 = new StockShare()
@@ -65,6 +65,21 @@ namespace ProjectCompScience.Services
         {
             stockShares.Remove(ss);
         }
+
+        public static async Task<bool> DeleteStockShareAsync(StockShare ItemToDelete)
+        {
+            if (stockShares != null)
+            {
+                if (stockShares.Contains(ItemToDelete))
+                {
+                    stockShares.Remove(ItemToDelete);
+                    await Task.CompletedTask;
+                    return true;
+                }
+            }
+            return false;             
+        }
+            
         public void AddMessage(StockShare ss)
         {
             stockShares.Add(ss);

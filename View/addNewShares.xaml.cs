@@ -1,9 +1,11 @@
 namespace ProjectCompScience.View;
+using ProjectCompScience.ViewModels;
 
 public partial class addNewShares : ContentPage
 {
 	public addNewShares()
 	{
-		InitializeComponent();
+        InitializeComponent();
+		BindingContext = new ViewModelAddNewShares();
 	}
 }
