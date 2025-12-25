@@ -39,5 +39,10 @@
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
+
+        <Button Text="Move to add new page"
+    Style="{StaticResource RegisterPageButtons}"
+    Command="{Binding ButtonMovePageCommand}"
+   ></Button>
     </VerticalStackLayout>
 </ContentPage>

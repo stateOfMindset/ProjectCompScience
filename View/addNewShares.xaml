@@ -4,9 +4,34 @@
              x:Class="ProjectCompScience.View.addNewShares"
              Title="addNewShares">
     <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
+        <!-- Id -->
+
+        <Entry Text="{Binding IdField}" Placeholder="Id" Style="{StaticResource EnRegister}" />
+        <Label Text="{Binding ErrorLabelIdText}"  Style="{StaticResource ErrorLabelStyle}"/>
+
+        <!-- Company -->
+
+        <Entry Placeholder="Company" Text="{Binding CompanyFieldText}" Style="{StaticResource EnRegister}" />
+        <Label Text="{Binding ErrorLabelCompanyField}" Style="{StaticResource ErrorLabelStyle}" />
+
+        <!-- ClassType -->
+        <Entry Placeholder="ClassType" Text="{Binding ClassTypeFieldText}" Style="{StaticResource EnRegister}" />
+        <Label Text="{Binding ErrorLabelClassTypeField}" Style="{StaticResource ErrorLabelStyle}" />
+
+        <!-- Price -->
+        <Entry Placeholder="Price" Text="{Binding PriceFieldText}" Style="{StaticResource EnRegister}" />
+        <Label Text="{Binding ErrorLabelPriceField}" Style="{StaticResource ErrorLabelStyle}" />
+
+        <!-- Quantity -->
+        <Entry Placeholder="Quantity" Text="{Binding QuantityFieldText}" Style="{StaticResource EnRegister}" />
+        <Label Text="{Binding ErrorLabelQuantityField}" Style="{StaticResource ErrorLabelStyle}" />
+
+        <!-- Create Share Button -->
+        <Button 
+                Text="Create"
+                Style="{StaticResource RegisterPageButtons}" 
+                Command="{Binding ButtonCreateShareCommand}">
+        </Button>
+
     </VerticalStackLayout>
 </ContentPage>

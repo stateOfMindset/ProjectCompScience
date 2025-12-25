@@ -8,8 +8,13 @@
     Title="ProjectCompScience">
 
     <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
+        Title="addNewSharePage"
+        ContentTemplate="{DataTemplate View:addNewShares}"
+        Route="addNewSharesPage" />
+
+    <ShellContent
+    Title="StockSharesPage"
+    ContentTemplate="{DataTemplate View:StockSharesPage}"
+    Route="StockSharesPage" />
 
 </Shell>

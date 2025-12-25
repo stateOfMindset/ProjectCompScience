@@ -4,8 +4,10 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using ProjectCompScience.Models;
 using ProjectCompScience.Services;
+using ProjectCompScience.View;
 
 namespace ProjectCompScience.ViewModels
 {
@@ -23,10 +25,20 @@ namespace ProjectCompScience.ViewModels
             }
         }
 
+
+
         public ViewModelShare()
         {
             StockShares = new ObservableCollection<StockShare>(LocalDataService.GetLocalDataService().GetStockShares());
             // still gotta make a new page for creating new StockShares , need to also create a new ViewModel for that page , and add the logic to it.
+            ButtonMovePageCommand = new Command(async () =>
+
+            await Shell.Current.GoToAsync("addNewShares"));
         }
+
+        #region commands
+        public ICommand ButtonMovePageCommand { get; set; }
+
+        #endregion
     }
 }
