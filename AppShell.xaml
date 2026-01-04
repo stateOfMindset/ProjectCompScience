@@ -4,13 +4,16 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:ProjectCompScience"
-    Shell.FlyoutBehavior="Disabled"
-    Title="ProjectCompScience">
+    xmlns:View="clr-namespace:ProjectCompScience.View"
+    Shell.FlyoutBehavior="Flyout"
+    Title="ProjectCompScience"
+    FlowDirection="LeftToRight"
+    >
 
     <ShellContent
-        Title="addNewSharePage"
+        Title="addNewShares"
         ContentTemplate="{DataTemplate View:addNewShares}"
-        Route="addNewSharesPage" />
+        Route="addNewShares" />
 
     <ShellContent
     Title="StockSharesPage"

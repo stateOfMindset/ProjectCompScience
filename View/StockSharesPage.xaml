@@ -10,7 +10,7 @@
             HorizontalOptions="Center"
             Text="Shares..."
             VerticalOptions="Center" />
-        <CollectionView ItemsSource="{Binding Shares}">
+        <CollectionView ItemsSource="{Binding StockShares}">
             <CollectionView.EmptyView>
                 <Label HorizontalTextAlignment="Center" Text="No Shares To Show !" />
             </CollectionView.EmptyView>
@@ -43,6 +43,7 @@
         <Button Text="Move to add new page"
     Style="{StaticResource RegisterPageButtons}"
     Command="{Binding ButtonMovePageCommand}"
-   ></Button>
+    IsEnabled="True"
+                ></Button>
     </VerticalStackLayout>
 </ContentPage>

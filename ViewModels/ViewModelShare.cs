@@ -30,10 +30,19 @@ namespace ProjectCompScience.ViewModels
         public ViewModelShare()
         {
             StockShares = new ObservableCollection<StockShare>(LocalDataService.GetLocalDataService().GetStockShares());
-            // still gotta make a new page for creating new StockShares , need to also create a new ViewModel for that page , and add the logic to it.
-            ButtonMovePageCommand = new Command(async () =>
+            //StockShares = new ObservableCollection<StockShare>();
+            LocalDataService.GetLocalDataService().SetStockSharesRefrence(StockShares);
 
-            await Shell.Current.GoToAsync("addNewShares"));
+            ButtonMovePageCommand = new Command(async () => {
+                try
+                {
+                    await Shell.Current.GoToAsync("//addNewShares");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+            });
         }
 
         #region commands

@@ -23,8 +23,8 @@
         <Label Text="{Binding ErrorLabelPriceField}" Style="{StaticResource ErrorLabelStyle}" />
 
         <!-- Quantity -->
-        <Entry Placeholder="Quantity" Text="{Binding QuantityFieldText}" Style="{StaticResource EnRegister}" />
-        <Label Text="{Binding ErrorLabelQuantityField}" Style="{StaticResource ErrorLabelStyle}" />
+        <Entry Placeholder="Quantity" Text="{Binding QuantityFieldText}" Style="{StaticResource EnRegister}"  />
+        <Label Text="{Binding ErrorLabelQuantityField}" Style="{StaticResource ErrorLabelStyle}"  />
 
         <!-- Create Share Button -->
         <Button 

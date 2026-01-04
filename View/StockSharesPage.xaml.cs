@@ -7,6 +7,6 @@ public partial class StockSharesPage : ContentPage
 	public StockSharesPage()
 	{
 		InitializeComponent();
-        BindingContext = new ViewModelAddNewShares();
+        BindingContext = new ViewModelShare();
     }
 }

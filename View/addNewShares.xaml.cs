@@ -3,9 +3,17 @@ using ProjectCompScience.ViewModels;
 
 public partial class addNewShares : ContentPage
 {
-	public addNewShares()
-	{
+    ViewModelAddNewShares vm;
+    public addNewShares()
+    {
         InitializeComponent();
-		BindingContext = new ViewModelAddNewShares();
-	}
+        vm = new ViewModelAddNewShares();
+        BindingContext = vm;
+    }
+
+    protected override void OnNavigatedTo(NavigatedToEventArgs args)
+    {
+        base.OnNavigatedTo(args);
+        vm.ClearFields();
+    }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ProjectCompScience.Models;
@@ -21,10 +22,12 @@ namespace ProjectCompScience.Services
             return instance;
         }
 
-
         #endregion
 
         public static List<StockShare> stockShares = new List<StockShare>();
+
+        // This is to keep the ObservableCollection references updated - needs implementation
+        public static List<ObservableCollection<StockShare>> StockSharesListeners;
         private void CreateFakeData()
         {
             StockShare ss1 = new StockShare()
@@ -80,9 +83,11 @@ namespace ProjectCompScience.Services
             return false;             
         }
             
-        public void AddMessage(StockShare ss)
+        public void AddStockShare(StockShare ss)
         {
             stockShares.Add(ss);
         }
+
+       
     }
 }

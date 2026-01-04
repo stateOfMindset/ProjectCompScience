@@ -24,86 +24,95 @@ namespace ProjectCompScience.ViewModels
         }
 
         public ViewModelAddNewShares()
-        {
-            StockShares = new ObservableCollection<StockShare>(LocalDataService.GetLocalDataService().GetStockShares());
-            ButtonCreateShareCommand = new Command(CreateShare);
+        {         
+            ButtonCreateShareCommand = new Command(async () =>
+            {
+                try
+                {
+                    StockShares = new ObservableCollection<StockShare>(LocalDataService.GetLocalDataService().GetStockShares());
+                    CreateShare();
+                    await Shell.Current.GoToAsync("//StockSharesPage");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+            });
+
+
+
         }
-
         #region Propfulls
-
-        private string IdField;
-
-        public string idField
+        public string IdField
         {
             get { return idField; }
             set
             {
                 idField = value;
                 OnPropertyChanged();
-
             }
         }
 
-        private string CompanyFieldText;
 
-        public string companyFieldText
+
+        private string idField;
+
+        public string CompanyFieldText
         {
             get { return companyFieldText; }
             set
             {
                 companyFieldText = value;
                 OnPropertyChanged();
-
             }
         }
 
-        private string ClassTypeFieldText;
+        private string companyFieldText;
 
-        public string classTypeFieldText
+        public string ClassTypeFieldText
         {
             get { return classTypeFieldText; }
             set
             {
                 classTypeFieldText = value;
                 OnPropertyChanged();
-
             }
         }
 
-        private string PriceFieldText;
+        private string classTypeFieldText;
 
-        public string priceFieldText
+        public string PriceFieldText
         {
             get { return priceFieldText; }
             set
             {
                 priceFieldText = value;
                 OnPropertyChanged();
-
             }
         }
 
-        private string QuantityFieldText;
+        private string priceFieldText;
 
-        public string quantityFieldText
+        public string QuantityFieldText
         {
             get { return quantityFieldText; }
             set
             {
                 quantityFieldText = value;
                 OnPropertyChanged();
-
             }
         }
+
+        private string quantityFieldText;
 
 
         #endregion
 
         #region Commands
-            public ICommand ButtonCreateShareCommand { get; set; }
+        public ICommand ButtonCreateShareCommand { get; set; }
         #endregion
 
-        private void CreateShare()
+        private async void CreateShare()
         {
             StockShare newShare = new StockShare()
             {
@@ -113,8 +122,17 @@ namespace ProjectCompScience.ViewModels
                 price = Convert.ToInt32(priceFieldText),
                 quantity = Convert.ToInt32(quantityFieldText)
             };
-
             StockShares.Add(newShare);
+            LocalDataService.GetLocalDataService().AddStockShare(newShare);
+        }
+
+        public void ClearFields()
+        {
+            IdField = string.Empty;
+            CompanyFieldText = string.Empty;
+            ClassTypeFieldText = string.Empty;
+            PriceFieldText = string.Empty;
+            QuantityFieldText = string.Empty;
         }
     }
 }
