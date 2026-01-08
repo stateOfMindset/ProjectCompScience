@@ -24,10 +24,11 @@ namespace ProjectCompScience.Services
 
         #endregion
 
-        public static List<StockShare> stockShares = new List<StockShare>();
+        public  List<StockShare> stockShares = new List<StockShare>();
+
 
         // This is to keep the ObservableCollection references updated - needs implementation
-        public static List<ObservableCollection<StockShare>> StockSharesListeners;
+        //public static List<ObservableCollection<StockShare>> StockSharesListeners;
         private void CreateFakeData()
         {
             StockShare ss1 = new StockShare()
@@ -64,12 +65,13 @@ namespace ProjectCompScience.Services
         {
             return stockShares;
         }
+   
         public void RemoveStockShare(StockShare ss)
         {
             stockShares.Remove(ss);
         }
 
-        public static async Task<bool> DeleteStockShareAsync(StockShare ItemToDelete)
+        public  async Task<bool> DeleteStockShareAsync(StockShare ItemToDelete)
         {
             if (stockShares != null)
             {
@@ -83,11 +85,53 @@ namespace ProjectCompScience.Services
             return false;             
         }
             
-        public void AddStockShare(StockShare ss)
+        public bool AddStockShare(StockShare ss)
         {
             stockShares.Add(ss);
+            return true;
         }
 
-       
+        public async Task<bool> AddStockShareAsync(StockShare ItemToDelete)
+        {
+            if (stockShares != null)
+            {
+                try
+                {
+                    if (stockShares.Contains(ItemToDelete))
+                    {
+                        stockShares.Add(ItemToDelete);
+                        var result = stockShares
+                            .GroupBy(x => x.Id)
+                            .Select(g => new StockShare
+                            {
+                                Id = g.Key,
+                                Company = g.First().Company,
+                                classType = g.First().classType,
+                                price = g.First().price,
+                                quantity = g.Sum(x => x.quantity)
+                            });
+
+                        await Task.CompletedTask;
+                        return true;
+                    }
+
+
+                    else
+                    {
+                        stockShares.Add(ItemToDelete);
+                        await Task.CompletedTask;
+                        return true;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+            }
+            
+            return false;
+        }
+
+
     }
 }

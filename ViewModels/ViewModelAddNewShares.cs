@@ -12,16 +12,16 @@ namespace ProjectCompScience.ViewModels
 {
     internal class ViewModelAddNewShares : ViewModelBase
     {
-        private ObservableCollection<StockShare> stockShares;
-        public ObservableCollection<StockShare> StockShares
-        {
-            get { return stockShares; }
-            set
-            {
-                stockShares = value;
-                OnPropertyChanged();
-            }
-        }
+       // private ObservableCollection<StockShare> stockShares;
+        //public ObservableCollection<StockShare> StockShares
+        //{
+        //    get { return stockShares; }
+        //    set
+        //    {
+        //        stockShares = value;
+        //        OnPropertyChanged();
+        //    }
+        //}
 
         public ViewModelAddNewShares()
         {         
@@ -29,7 +29,7 @@ namespace ProjectCompScience.ViewModels
             {
                 try
                 {
-                    StockShares = new ObservableCollection<StockShare>(LocalDataService.GetLocalDataService().GetStockShares());
+                    //StockShares = new ObservableCollection<StockShare>(LocalDataService.GetLocalDataService().GetStockShares());
                     CreateShare();
                     await Shell.Current.GoToAsync("//StockSharesPage");
                 }
@@ -122,8 +122,12 @@ namespace ProjectCompScience.ViewModels
                 price = Convert.ToInt32(priceFieldText),
                 quantity = Convert.ToInt32(quantityFieldText)
             };
-            StockShares.Add(newShare);
-            LocalDataService.GetLocalDataService().AddStockShare(newShare);
+            
+            bool succeeed = await LocalDataService.GetLocalDataService().AddStockShareAsync(newShare);
+            if (succeeed) {
+               //
+            }
+           
         }
 
         public void ClearFields()

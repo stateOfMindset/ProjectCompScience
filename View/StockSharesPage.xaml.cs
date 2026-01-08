@@ -4,9 +4,17 @@ using ProjectCompScience.ViewModels;
 
 public partial class StockSharesPage : ContentPage
 {
-	public StockSharesPage()
+	ViewModelShare vm;
+
+    public StockSharesPage()
 	{
 		InitializeComponent();
-        BindingContext = new ViewModelShare();
+        vm = new ViewModelShare();
+		BindingContext = vm;
+    }
+    protected override void OnNavigatedTo(NavigatedToEventArgs args)
+    {
+        base.OnNavigatedTo(args);
+        vm.InitAsync();
     }
 }

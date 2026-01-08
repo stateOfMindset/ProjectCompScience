@@ -29,9 +29,9 @@ namespace ProjectCompScience.ViewModels
 
         public ViewModelShare()
         {
-            StockShares = new ObservableCollection<StockShare>(LocalDataService.GetLocalDataService().GetStockShares());
+            InitAsync();
             //StockShares = new ObservableCollection<StockShare>();
-            LocalDataService.GetLocalDataService().SetStockSharesRefrence(StockShares);
+            //LocalDataService.GetLocalDataService().SetStockSharesRefrence(StockShares); NEEDS IMPLENTATION IN LOCALDATASERVICE.CS
 
             ButtonMovePageCommand = new Command(async () => {
                 try
@@ -45,6 +45,10 @@ namespace ProjectCompScience.ViewModels
             });
         }
 
+        public void InitAsync()
+        {
+            StockShares = new ObservableCollection<StockShare>(LocalDataService.GetLocalDataService().GetStockShares());
+        }
         #region commands
         public ICommand ButtonMovePageCommand { get; set; }
 
