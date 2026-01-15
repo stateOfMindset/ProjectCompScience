@@ -4,6 +4,10 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Firebase.Auth.Providers;
+using Firebase.Auth.Repository;
+using Firebase.Auth;
+using Firebase.Database;
 using ProjectCompScience.Models;
 
 namespace ProjectCompScience.Services
@@ -17,18 +21,41 @@ namespace ProjectCompScience.Services
             if (instance == null)
             {
                 instance = new LocalDataService();
-                instance.CreateFakeData();
+                //instance.CreateFakeData();
             }
             return instance;
         }
 
         #endregion
 
+        #region properties
+        FirebaseAuthClient? auth;
+        FirebaseClient? client;
         public  List<StockShare> stockShares = new List<StockShare>();
+        #endregion
 
+        public void Init()
+        {
+            var config = new FirebaseAuthConfig()
+            {
+                ApiKey = "AIzaSyCsgKP-XDUCNIt0nsUSSUEVNJzpedO6Kzg",
+                AuthDomain = "computersciencefinaleproject.firebaseapp.com", //כתובת התחברות
+                Providers = new FirebaseAuthProvider[] //רשימת אפשריות להתחבר
+              {
+          new EmailProvider() //אנחנו נשתמש בשירות חינמי של התחברות עם מייל
+              },
+                UserRepository = new FileUserRepository("appUserData") //לא חובה, שם של קובץ בטלפון הפרטי שאפשר לשמור בו את מזהה ההתחברות כדי לא הכניס כל פעם את הסיסמא 
+            };
+            auth = new FirebaseAuthClient(config); //ההתחברות
 
-        // This is to keep the ObservableCollection references updated - needs implementation
-        //public static List<ObservableCollection<StockShare>> StockSharesListeners;
+            client =
+              new FirebaseClient(@"https://computersciencefinaleproject-default-rtdb.europe-west1.firebasedatabase.app/", //כתובת מסד הנתונים
+              new FirebaseOptions
+              {
+                  AuthTokenAsyncFactory = () => Task.FromResult(auth.User.Credential.IdToken)// מזהה ההתחברות של המשתמש עם השרת, הנתון נשמר במכשיר
+              });
+        }
+
         private void CreateFakeData()
         {
             StockShare ss1 = new StockShare()

@@ -43,14 +43,42 @@ namespace ProjectCompScience.ViewModels
                     Console.WriteLine(ex.Message);
                 }
             });
+
+            ButtonDeleteShareCommand = new Command(async (item) =>
+            {
+                try
+                {
+                    await DeleteShare(item as StockShare);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+
+
+            });
         }
+
+        #region Asyncs
+        private async Task DeleteShare(StockShare theItemToDelete)
+        {
+            bool successed = await LocalDataService.GetLocalDataService().DeleteStockShareAsync(theItemToDelete);
+            if (successed)
+            {
+                StockShares.Remove(theItemToDelete);
+            }
+        }
+
 
         public void InitAsync()
         {
             StockShares = new ObservableCollection<StockShare>(LocalDataService.GetLocalDataService().GetStockShares());
         }
+        #endregion
         #region commands
         public ICommand ButtonMovePageCommand { get; set; }
+
+        public ICommand ButtonDeleteShareCommand { get; set; }
 
         #endregion
     }

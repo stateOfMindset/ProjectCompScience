@@ -3,7 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="ProjectCompScience.View.StockSharesPage"
              Title="StockSharesPage"
-             xmlns:models="clr-namespace:ProjectCompScience.Models">
+             xmlns:models="clr-namespace:ProjectCompScience.Models"
+             xmlns:viewmodels="clr-namespace:ProjectCompScience.ViewModels">
                 
     <VerticalStackLayout>
         <Label
@@ -33,6 +34,14 @@
                                     Text="{Binding quantity}"
                                     TextColor="White"
                                     VerticalOptions="Center" />
+                                <Button
+                                BackgroundColor="Red"
+                                Command="{Binding ButtonDeleteShareCommand, Source={x:RelativeSource AncestorType={x:Type viewmodels:ViewModelShare}, Mode=FindAncestorBindingContext}}"
+                                CommandParameter="{Binding .}"
+                                HorizontalOptions="Start"
+                                Text="Sell"
+                                Style="{StaticResource RegisterPageButtons}"
+                                WidthRequest="200" />
                             </Grid>
                         </StackLayout>
                     </Border>
