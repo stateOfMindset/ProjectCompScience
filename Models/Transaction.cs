@@ -14,6 +14,5 @@ namespace ProjectCompScience.Models
         public string? Id;
         public DateTime DateTime;
         public StockShare? StockShare;
-
     }
 }
