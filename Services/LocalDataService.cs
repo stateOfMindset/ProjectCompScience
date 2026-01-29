@@ -9,6 +9,7 @@ using Firebase.Auth.Repository;
 using Firebase.Auth;
 using Firebase.Database;
 using ProjectCompScience.Models;
+using Firebase.Database.Query;
 
 namespace ProjectCompScience.Services
 {
@@ -29,9 +30,13 @@ namespace ProjectCompScience.Services
         #endregion
 
         #region properties
+        public List<StockShare> stockShares = new List<StockShare>();
+
+
         FirebaseAuthClient? auth;
         FirebaseClient? client;
-        public  List<StockShare> stockShares = new List<StockShare>();
+        public AuthCredential? loginAuthUser; //This is to keep the logged in user credential, so we can logout later
+        public myUser fullDetaillsLoggedInUser;
         #endregion
 
         public void Init()
@@ -92,13 +97,13 @@ namespace ProjectCompScience.Services
         {
             return stockShares;
         }
-   
+
         public void RemoveStockShare(StockShare ss)
         {
             stockShares.Remove(ss);
         }
 
-        public  async Task<bool> DeleteStockShareAsync(StockShare ItemToDelete)
+        public async Task<bool> DeleteStockShareAsync(StockShare ItemToDelete)
         {
             if (stockShares != null)
             {
@@ -109,9 +114,9 @@ namespace ProjectCompScience.Services
                     return true;
                 }
             }
-            return false;             
+            return false;
         }
-            
+
         public bool AddStockShare(StockShare ss)
         {
             stockShares.Add(ss);
@@ -155,9 +160,108 @@ namespace ProjectCompScience.Services
                     Console.WriteLine(e);
                 }
             }
-            
+
             return false;
         }
+
+        public async Task<bool> TryLogin(string userNameString, string passwordString)
+        {
+            if (userNameString == null || passwordString == null)
+            {
+                return false;
+            }
+            try
+            {
+                var authUser = await auth.SignInWithEmailAndPasswordAsync(userNameString, passwordString);
+                loginAuthUser = authUser.AuthCredential;
+                // We are logged in. Now go to DataBase and fetch data on user itself. Exampe 1 parameter: Name
+                string uid = auth.User.Uid;
+                string Name = await client
+                    .Child("users")
+                    .Child(uid)
+                    .Child("Name")
+                    .OnceSingleAsync<string>();
+                //!!need to add here the transactions of the user , and or stocks that he holds , with stockID and quantity!!
+
+                fullDetaillsLoggedInUser = new myUser()
+                {
+                    Email = auth.User.Info.Email,
+                    Id = uid,
+                    Name = Name
+                };
+                // Authentication successful 
+                // We keep the token or Credential in loginAuthUser, so we can erase it later in logout
+                // You can access the authenticated user's details via authUser.User
+                // you should create a new user or person
+                // Person person = new Person(){Email=authUser.User.info.Email, ...
+                // Don't put the password in the Person :)
+
+                // ((App)Application.Current).SetAuthenticatedShell();
+
+                return true;
+            }
+            catch (FirebaseAuthException ex)
+            {
+                // Authentication failed
+                return false;
+            }
+        }
+
+        public async Task<bool> TryRegister(string userNameString, string passwordString, string Name)
+        {
+            try
+            {
+                // 1: Create a user in Firebase with an Email and Password.
+                var respond = await auth.CreateUserWithEmailAndPasswordAsync(userNameString, passwordString);
+                // 2: User was created and also user is also Logged in
+                // 3: We Store the Uid of the user
+                fullDetaillsLoggedInUser = new myUser()
+                {
+                    Email = respond.User.Info.Email,
+                    Id = respond.User.Uid,
+                    Name = Name
+                };
+                // 3: We can continue and add more details about the user but this time in the firebase Database
+                // Example: saving the full name
+                await client
+                    .Child("users")
+                    .Child(fullDetaillsLoggedInUser.Id)
+                    .PutAsync(new
+                    {
+                        Name = Name
+                        //Add here transaction history or stocks he holds
+                    });
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage.DisplayAlert(
+                    "Error",
+                    ex.Message,
+                    "OK"
+                );
+
+                return false;
+            }
+        }
+
+
+        public bool Logout()
+        {
+            try
+            {
+                auth.SignOut();
+                loginAuthUser = null;
+                fullDetaillsLoggedInUser = null;
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
 
 
     }

@@ -69,6 +69,12 @@
 	  <MauiXaml Update="Resources\Styles\Mystyles.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="ShellAuth.xaml">
+	    <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="ShellNotAuth.xaml">
+	    <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="View\addNewShares.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

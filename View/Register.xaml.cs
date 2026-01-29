@@ -4,11 +4,11 @@ namespace ProjectCompScience.View;
 
 public partial class Register : ContentPage
 {
+    ViewModelRegister vm;
     public Register()
     {
         InitializeComponent();
-        BindingContext = new ViewModelRegister();
-
-
+        vm = new ViewModelRegister();
+        BindingContext = vm;
     }
 }

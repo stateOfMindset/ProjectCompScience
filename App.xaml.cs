@@ -8,7 +8,19 @@ namespace ProjectCompScience
         {
             InitializeComponent();
 
-            MainPage = new AppShell();
+            MainPage = new ShellNotAuth();
+        }
+
+        public void SetAuthenticatedShell()
+        {
+            MainPage = new ShellAuth();
+        }
+
+        public void SetUnauthenticatedShell()
+        {
+            MainPage = new ShellNotAuth();
         }
     }
 }
+
+

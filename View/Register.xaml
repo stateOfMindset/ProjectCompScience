@@ -65,6 +65,8 @@
 
                 <Label Style="{StaticResource ErrorLabelStyle}" Text="{Binding ErrorLabelPasswordField}" />
 
+
+                <!-- Confirm Password -->
                 <Grid ColumnDefinitions="*,Auto">
                     <Entry
                     Style="{StaticResource EnRegister}"
@@ -87,8 +89,11 @@
                 <!-- Register Button -->
                 <Button Text="Register"
                     Style="{StaticResource RegisterPageButtons}"
-                    Command="{Binding ButtonRegisterCommand}"
+                    Command="{Binding SubmitRegisterCommand}"
                    ></Button>
+
+                <!-- Go to Login Page Button -->
+                <Button BackgroundColor="Transparent" TextColor="blue" Command="{Binding GoLoginCommand}" Text="Go Login"/>
             </VerticalStackLayout>
         </Frame>
     </ScrollView>

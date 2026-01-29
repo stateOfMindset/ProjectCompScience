@@ -6,11 +6,12 @@ using System.Threading.Tasks;
 
 namespace ProjectCompScience.Models
 {
-    internal class User
+    internal class myUser
     {
         public string? Email { get; set; }
         public string? Id { get; set; }
         public string? Name { get; set; }
+
 
 
 

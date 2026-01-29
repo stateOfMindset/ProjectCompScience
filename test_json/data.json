@@ -1,9 +1,55 @@
 ﻿{
+  "stocks": {
+    "appl": {
+      "companyName": "Apple Inc.",
+      "currentPrice": 150,
+      "availableShares": 1000000
+    },
+    "goog": {
+      "companyName": "Alphabet Inc.",
+      "currentPrice": 2800,
+      "availableShares": 500000
+    },
+    "amzn": {
+      "companyName": "Amazon.com Inc.",
+      "currentPrice": 3400,
+      "availableShares": 300000
+    }
+  },
   "users": {
     "vzlp5WvQ5eZoQX0bs7GxD274piu2": {
       "username": "michael",
-      "transactions": { "name": "s" },
-      "stockshares": { "name": "s" }
+      "transactionHistory": {
+        "uidTrans1": {
+          "pricePerUnit": 100,
+          "totalPrice": 500,
+          "totalAmount": 5,
+          "DateTime": "2024-06-01T10:00:00",
+          "stockShareUID": "appl"
+        },
+        "uidTrans2": {
+          "pricePerUnit": 100,
+          "totalPrice": 500,
+          "totalAmount": -5,
+          "DateTime": "2024-07-01T10:00:00",
+          "stockShareUID": "appl"
+        },
+        "uidTrans3": {
+          "pricePerUnit": 100,
+          "totalPrice": 500,
+          "totalAmount": -5,
+          "DateTime": "2024-09-01T10:00:00",
+          "stockShareUID": "goog"
+        }
+      },
+      "stockshares": {
+        "appl": {
+          "quantity": 10
+        },
+        "goog": {
+          "quantity": 13
+        }
+      }
     }
   }
 }
