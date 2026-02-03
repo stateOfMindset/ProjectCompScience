@@ -35,12 +35,13 @@
 
                 <!-- Name -->
 
-                <Entry Text="{Binding NameField}" Placeholder="Name" Style="{StaticResource EnRegister}" />
+                <Entry Text="{Binding FullName}" Placeholder="Name" Style="{StaticResource EnRegister}" />
                 <Label Text="{Binding ErrorLabelNameText}"  Style="{StaticResource ErrorLabelStyle}"/>
 
                 <!-- Email -->
 
-                <Entry Placeholder="Email" Text="{Binding EmailFieldText}" Style="{StaticResource EnRegister}" />
+                <Entry Placeholder="Email" Text="{Binding EmailInput}" Style="{StaticResource EnRegister}" />
+                
                 <Label Text="{Binding ErrorLabelEmailField}" Style="{StaticResource ErrorLabelStyle}" />
 
                 <!-- Password -->
@@ -50,7 +51,7 @@
                     Grid.Column="0"
                     IsPassword ="{Binding IsVisiblePasswordField}"
                     Placeholder="Enter Password"
-                    Text="{Binding PasswordField}"
+                    Text="{Binding PasswordInput1}"
                     
                 />
                     <Button
@@ -70,7 +71,7 @@
                 <Grid ColumnDefinitions="*,Auto">
                     <Entry
                     Style="{StaticResource EnRegister}"
-                   Text="{Binding ConfirmPasswordField}"
+                   Text="{Binding PasswordInput2}"
                     Grid.Column="0"
                     IsPassword="{Binding IsVisibleConfirmPasswordField}"                 
                     Placeholder="Confirm Password"
