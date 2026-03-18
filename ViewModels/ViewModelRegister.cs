@@ -70,6 +70,7 @@ namespace ProjectCompScience.ViewModels
         #region Commands Declaration
         public ICommand SubmitRegisterCommand { get; set; }
         public ICommand GoLoginCommand { get; set; }
+        public ICommand ButtonShowPasswordCommand { get; set; }
         #endregion
 
         #region Constuctor
@@ -104,15 +105,7 @@ namespace ProjectCompScience.ViewModels
 
 //}
 
-//private void initiateInstances()
-//{
-//    errorLabelNameText = "";
-//    nameField = "";
-//    ButtonRegisterCommand = new Command(Register);
-//    ButtonShowPasswordCommand = new Command(ShowPassword);
-//    ButtonShowConfirmPasswordCommand = new Command(ShowConfirmPassword);
 
-//}
 
 //#region nameFieldPropfulls
 //private string nameField;
