@@ -7,8 +7,9 @@
         <Label Text="Test for graphic"/>
         <GraphicsView
                 x:Name="graphicView"
-            HorizontalOptions="Fill"
-            HeightRequest="200"
+            
+            WidthRequest="1000"
+            HeightRequest="500"
             Margin="20"
           />
 

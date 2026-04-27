@@ -4,6 +4,7 @@ using ProjectCompScience.Models;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -30,23 +31,43 @@ namespace ProjectCompScience.Components
         
         public void Draw(ICanvas canvas, RectF dirtyRect)
         {
+            if (StockPoints == null) return;
+
+            canvas.StrokeColor = Colors.Green;
+            drawLineSeries(canvas, dirtyRect, p => float.Parse(p.Open));
+
+
+            canvas.StrokeColor = Colors.Red;
+            drawLineSeries(canvas, dirtyRect, p => float.Parse(p.Close));
+
+            canvas.StrokeColor = Colors.White; 
+            drawLineSeries(canvas, dirtyRect, p => float.Parse(p.High));
+
+
+
+        }
+
+        public void drawLineSeries(ICanvas canvas, RectF dirtyRect, Func<StockGraphPoint , float> priceSelector) {
             List<PointMine> points = new List<PointMine>();
 
-            foreach (var p in StockPoints) {
-                long px = p.x.Ticks / 86400; 
-                float py = p.y;
-                PointMine newP = new PointMine{
-                    x = px ,
+            foreach (var p in StockPoints)
+            {
+                long px = p.Timestamp.Ticks / 86400; //86400 - seconds per day
+                float py = priceSelector(p); //open or close so we can do 2 graphs.
+
+                PointMine newP = new PointMine
+                {
+                    x = px,
                     y = py
                 };
 
-                points.Add(newP);       
+                points.Add(newP);
             }
 
             if (points == null || points.Count < 2)
                 return;
 
-            canvas.StrokeColor = Colors.CadetBlue;
+
             canvas.StrokeSize = 3;
 
             // 1. Find bounds
@@ -69,12 +90,12 @@ namespace ProjectCompScience.Components
             {
                 float x = ((float)(p.x - minX)) / XRange * dirtyRect.Width;
                 float y = (float)((maxY - p.y) / YRange * dirtyRect.Height);
-                if (x < Xmin || x>Xmax)
+                if (x < Xmin || x > Xmax)
                     continue;
                 screenPoints.Add(new PointF(x, y)); // TO DO : FIX TS
             }
 
-            
+
 
             // 3. Draw polyline
             for (int i = 0; i < screenPoints.Count - 1; i++)
