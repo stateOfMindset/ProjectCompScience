@@ -4,7 +4,9 @@
              x:Class="ProjectCompScience.View.test"
              Title="test">
     <VerticalStackLayout>
-        <Label Text="Test for graphic"/>
+        <Entry x:Name="StockEntry" Placeholder="Enter Symbol (e.g. MSFT)" />
+        <Button Text="Update Graph" Clicked="OnUpdateClicked" />
+        <Label Text=""/>
         <GraphicsView
                 x:Name="graphicView"
             

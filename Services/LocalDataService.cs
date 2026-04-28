@@ -41,10 +41,13 @@ namespace ProjectCompScience.Services
 
         public void Init()
         {
+            string envPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", ".env");
+            DotNetEnv.Env.Load(envPath);
+
             var config = new FirebaseAuthConfig()
             {
-                ApiKey = "AIzaSyCsgKP-XDUCNIt0nsUSSUEVNJzpedO6Kzg",
-                AuthDomain = "computersciencefinaleproject.firebaseapp.com", //כתובת התחברות
+                ApiKey = Environment.GetEnvironmentVariable("ApiKey_firebase") ,
+                AuthDomain = Environment.GetEnvironmentVariable("AuthDomain_firebase"), //כתובת התחברות
                 Providers = new FirebaseAuthProvider[] //רשימת אפשריות להתחבר
               {
           new EmailProvider() //אנחנו נשתמש בשירות חינמי של התחברות עם מייל
@@ -53,8 +56,9 @@ namespace ProjectCompScience.Services
             };
             auth = new FirebaseAuthClient(config); //ההתחברות
 
+            string url = Environment.GetEnvironmentVariable("url_firebase");
             client =
-              new FirebaseClient(@"https://computersciencefinaleproject-default-rtdb.europe-west1.firebasedatabase.app/", //כתובת מסד הנתונים
+              new FirebaseClient($"{url}", //כתובת מסד הנתונים
               new FirebaseOptions
               {
                   AuthTokenAsyncFactory = () => Task.FromResult(auth.User.Credential.IdToken)// מזהה ההתחברות של המשתמש עם השרת, הנתון נשמר במכשיר
