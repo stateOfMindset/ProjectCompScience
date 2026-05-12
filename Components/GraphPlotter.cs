@@ -11,13 +11,13 @@ using System.Text;
 using System.Threading.Tasks;
 using PointF = Microsoft.Maui.Graphics.PointF;
 
-
 namespace ProjectCompScience.Components
 {
     class GraphPlotter : IDrawable
     {
-
         public List<StockGraphPoint> StockPoints { get; set; } = new List<StockGraphPoint>();
+        public List<StockGraphPoint> PredictionData { get; set; } = new List<StockGraphPoint>();
+        public List<PointMine> Points { get; set; } = new();
 
         private double xmin;
         private float prettyMin;
@@ -30,90 +30,98 @@ namespace ProjectCompScience.Components
             get { return xmin; }
         }
 
-
-
         public double Xmax { get; set; }
 
         public void Draw(ICanvas canvas, RectF dirtyRect)
         {
             DrawGrid(canvas, dirtyRect);
 
-            if (StockPoints == null || StockPoints.Count() == 0) return;
+            if (StockPoints == null || !StockPoints.Any()) return;
+
+            // 1. CREATE A MASTER LIST FOR SCALING
+            // We need the grid to be big enough to fit both history AND the future prediction
+            var allPoints = new List<StockGraphPoint>(StockPoints);
+            if (PredictionData != null && PredictionData.Any())
+            {
+                allPoints.AddRange(PredictionData);
+            }
 
             xmin = xmin + _padding;
             Xmax = Xmax - _padding;
-            float minP = StockPoints.Min(p => float.Parse(p.Low));
-            float maxP = StockPoints.Max(p => float.Parse(p.High));
+
+            // Calculate min/max prices using ALL points
+            float minP = allPoints.Min(p => float.Parse(p.Low ?? p.Open));
+            float maxP = allPoints.Max(p => float.Parse(p.High ?? p.Open));
             prettyMax = MathF.Ceiling(maxP / 9) * 10;
             prettyMin = MathF.Ceiling(minP - minP / 10);
-            DrawLabels(canvas, dirtyRect, minP, prettyMax);
 
+            // Calculate absolute start and end dates
+            long globalMinX = allPoints.Min(p => p.Timestamp.Ticks / 86400);
+            long globalMaxX = allPoints.Max(p => p.Timestamp.Ticks / 86400);
+
+            // Pass the master list to labels so future dates render on the X-Axis
+            DrawLabels(canvas, dirtyRect, minP, prettyMax, allPoints);
+
+            // 2. DRAW HISTORY (Solid Lime)
             canvas.StrokeColor = Microsoft.Maui.Graphics.Color.FromArgb("#FF2ECC71");
-            drawLineSeries(canvas, dirtyRect, p => float.Parse(p.Open));
+            canvas.StrokeDashPattern = null;
+            drawLineSeries(canvas, dirtyRect, StockPoints, globalMinX, globalMaxX, p => float.Parse(p.Open));
 
-            //canvas.StrokeColor = Microsoft.Maui.Graphics.Color.FromArgb("#FF3498DB");
-            //drawLineSeries(canvas, dirtyRect, p => float.Parse(p.Close));
+            // 3. DRAW PREDICTION (Dotted Purple)
+            if (PredictionData != null && PredictionData.Any())
+            {
+                canvas.StrokeColor = Colors.MediumPurple;
+                canvas.StrokeDashPattern = new float[] { 5, 5 }; // The magic dotted line array!
 
-            //canvas.StrokeColor = Microsoft.Maui.Graphics.Color.FromArgb("#FFF1C40F");
-            //drawLineSeries(canvas, dirtyRect, p => float.Parse(p.High));
+                // To make the purple line seamlessly connect to the green line, 
+                // we prepend the very last history point to the prediction drawing list.
+                var connectionList = new List<StockGraphPoint> { StockPoints.Last() };
+                connectionList.AddRange(PredictionData);
 
-            //canvas.StrokeColor = Microsoft.Maui.Graphics.Color.FromArgb("#FFE74C3C");
-            //drawLineSeries(canvas, dirtyRect, p => float.Parse(p.Low));
-
-
-
+                drawLineSeries(canvas, dirtyRect, connectionList, globalMinX, globalMaxX, p => float.Parse(p.Open));
+            }
         }
 
-        public void drawLineSeries(ICanvas canvas, RectF dirtyRect, Func<StockGraphPoint, float> priceSelector)
+        // Updated to accept specific data to draw, and the global X bounds
+        public void drawLineSeries(ICanvas canvas, RectF dirtyRect, List<StockGraphPoint> dataToDraw, long globalMinX, long globalMaxX, Func<StockGraphPoint, float> priceSelector)
         {
-            List<PointMine> points = new List<PointMine>();
+            List<PointMine> Points = new List<PointMine>();
 
-            foreach (var p in StockPoints)
+            foreach (var p in dataToDraw)
             {
                 long px = p.Timestamp.Ticks / 86400; //86400 - seconds per day
-                float py = priceSelector(p); //open or close so we can do 2 graphs.
+                float py = priceSelector(p);
 
-                PointMine newP = new PointMine
-                {
-                    x = px,
-                    y = py
-                };
-
-                points.Add(newP);
+                Points.Add(new PointMine { x = px, y = py });
             }
 
-            if (points == null || points.Count < 2)
-                return;
-
+            if (Points == null || Points.Count < 2) return;
 
             canvas.StrokeSize = 2;
 
-            // 1. Find bounds
-            long minX = points.Min(l => l.x);
-            long maxX = points.Max(l => l.x);
-
-            long XRange = maxX - minX;
+            // XRange is now based on the GLOBAL timeline, not just this specific line segment
+            long XRange = globalMaxX - globalMinX;
             float YRange = prettyMax - prettyMin;
 
-            // Avoid division by zero
             if (XRange == 0) XRange = 1;
             if (YRange == 0) YRange = 0.00001f;
 
-            // 2. Convert each GPS point to canvas coordinates
+            float usableWidth = dirtyRect.Width - (2 * _padding);
+            float usableHeight = dirtyRect.Height - (2 * _padding);
+
             List<PointF> screenPoints = new();
 
-            foreach (var p in points)
+            foreach (var p in Points)
             {
-                float x = ((float)(p.x - minX)) / XRange * dirtyRect.Width - _padding;
-                float y = (float)((prettyMax - p.y) / YRange * dirtyRect.Height) - _padding;
-                if (x < Xmin || x > Xmax)
-                    continue;
-                screenPoints.Add(new PointF(x, y)); // TO DO : FIX TS
+                // Calculate percentage based on the GLOBAL minX
+                float xPercent = ((float)(p.x - globalMinX)) / XRange;
+                float yPercent = (prettyMax - p.y) / YRange;
+
+                float x = _padding + (xPercent * usableWidth);
+                float y = _padding + (yPercent * usableHeight);
+                screenPoints.Add(new PointF(x, y));
             }
 
-
-
-            // 3. Draw polyline
             for (int i = 0; i < screenPoints.Count - 1; i++)
             {
                 var p1 = screenPoints[i];
@@ -128,7 +136,7 @@ namespace ProjectCompScience.Components
             float usableWidth = dirtyRect.Width - (2 * _padding);
             float usableHeight = dirtyRect.Height - (2 * _padding);
 
-            canvas.StrokeColor = Colors.DimGray; 
+            canvas.StrokeColor = Colors.DimGray;
             canvas.StrokeSize = 0.5f;
             canvas.StrokeDashPattern = new float[] { 2, 2 };
 
@@ -137,14 +145,12 @@ namespace ProjectCompScience.Components
             for (int i = 0; i <= gridCount; i++)
             {
                 float y = _padding + (i * (usableHeight / gridCount));
-
                 canvas.DrawLine(_padding, y, dirtyRect.Width - _padding, y);
             }
 
             for (int i = 0; i <= gridCount; i++)
             {
                 float x = _padding + (i * (usableWidth / gridCount));
-
                 canvas.DrawLine(x, _padding, x, dirtyRect.Height - _padding);
             }
 
@@ -156,27 +162,28 @@ namespace ProjectCompScience.Components
             canvas.DrawLine(_padding, dirtyRect.Height - _padding, dirtyRect.Width - _padding, dirtyRect.Height - _padding);
         }
 
-        private void DrawLabels(ICanvas canvas, RectF dirtyRect, float minPrice, float maxPrice)
+        // Updated to accept the master list of points so future dates are calculated
+        private void DrawLabels(ICanvas canvas, RectF dirtyRect, float minPrice, float maxPrice, List<StockGraphPoint> allPoints)
         {
-            if (StockPoints == null || !StockPoints.Any()) return;
+            if (allPoints == null || !allPoints.Any()) return;
 
             float usableWidth = dirtyRect.Width - (2 * _padding);
             float usableHeight = dirtyRect.Height - (2 * _padding);
 
-            canvas.FontColor = Colors.WhiteSmoke; 
+            canvas.FontColor = Colors.WhiteSmoke;
             canvas.FontSize = 10;
 
             int priceDivisions = 5;
             for (int i = 0; i <= priceDivisions; i++)
             {
                 float priceVal = prettyMin + (i * (prettyMax - prettyMin) / priceDivisions);
-
                 float y = _padding + usableHeight - (i * (usableHeight / priceDivisions));
+
                 canvas.DrawString(
                     $"{FormatPrice(priceVal)}",
-                    0,             
-                    y -10,        
-                    _padding - 5 ,  
+                    0,
+                    y - 10,
+                    _padding - 5,
                     20,
                     HorizontalAlignment.Right,
                     VerticalAlignment.Center);
@@ -185,15 +192,16 @@ namespace ProjectCompScience.Components
             int dateDivisions = 5;
             for (int i = 0; i <= dateDivisions; i++)
             {
-                int index = i * (StockPoints.Count - 1) / dateDivisions;
-                var point = StockPoints[index];
+                // uses allPoints to grab the dates
+                int index = i * (allPoints.Count - 1) / dateDivisions;
+                var point = allPoints[index];
 
                 float x = _padding + (i * (usableWidth / dateDivisions));
 
                 canvas.DrawString(
                     point.Timestamp.ToString("dd/MM"),
-                    x - 25,                     
-                    dirtyRect.Height - _padding + 5, 
+                    x - 25,
+                    dirtyRect.Height - _padding + 5,
                     50,
                     20,
                     HorizontalAlignment.Center,
@@ -203,16 +211,14 @@ namespace ProjectCompScience.Components
 
         private string FormatPrice(float price)
         {
-            if (price >= 100000) // $100,000+
-                return $"${(price / 1000):F0}K"; //F.0 , shows 0 numbers after the decimel [$300,021 = $300k]
-
-            if (price >= 1000) // $1,000 - $99,999
-                return $"${(price / 1000):F1}K"; //F.1 , show 1 number after the decimal [$3542 =  $3.5K]
-
-            return $"${price:F0}"; // Standard under $1,000
+            if (price >= 100000) return $"${(price / 1000):F0}K";
+            if (price >= 1000) return $"${(price / 1000):F1}K";
+            return $"${price:F0}";
         }
     }
-    class PointMine {
+
+    class PointMine
+    {
         public long x { get; set; }
         public float y { get; set; }
     }

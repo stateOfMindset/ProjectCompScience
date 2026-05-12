@@ -10,14 +10,33 @@
     FlowDirection="LeftToRight"
     >
 
-    <ShellContent
-        Title="addNewShares"
-        ContentTemplate="{DataTemplate View:addNewShares}"
-        Route="addNewShares" />
+    <TabBar>
 
-    <ShellContent
-    Title="StockSharesPage"
-    ContentTemplate="{DataTemplate View:StockSharesPage}"
-    Route="StockSharesPage" />
+        <Tab Title="addNew shares">
+            <ShellContent
+            Title="buyShares"
+            ContentTemplate="{DataTemplate View:BuyShares}"
+            Route="BuyShares" />
+        </Tab>
+
+        
+
+        <Tab Title="StockSharesPage">
+            <ShellContent
+            Title="StockSharesPage"
+            ContentTemplate="{DataTemplate View:StockSharesPage}"
+            Route="StockSharesPage" />
+        </Tab>
+
+        <Tab Title="TransactionHistory">
+            <ShellContent
+             Title="TransactionHistory"
+             ContentTemplate="{DataTemplate View:TransactionHistory}"
+             Route="TransactionHistory" />
+        </Tab>
+
+
+
+    </TabBar>
 
 </Shell>

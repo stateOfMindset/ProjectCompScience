@@ -6,9 +6,16 @@ namespace ProjectCompScience
     {
         public App()
         {
-            InitializeComponent();
-            MainPage = new test();
-            //MainPage = new ShellNotAuth();
+            try
+            {
+                InitializeComponent();
+                MainPage = new ShellNotAuth();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"FATAL STARTUP ERROR: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"INNER EXCEPTION: {ex.InnerException?.Message}");
+            }
         }
 
         public void SetAuthenticatedShell()

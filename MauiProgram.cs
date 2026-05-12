@@ -7,7 +7,6 @@ namespace ProjectCompScience
     {
         public static MauiApp CreateMauiApp()
         {
-            LocalDataService.GetLocalDataService().Init();
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()

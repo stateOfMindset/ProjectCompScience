@@ -12,9 +12,12 @@ public partial class StockSharesPage : ContentPage
         vm = new ViewModelShare();
 		BindingContext = vm;
     }
-    protected override void OnNavigatedTo(NavigatedToEventArgs args)
+    protected override async void OnAppearing()
     {
-        base.OnNavigatedTo(args);
-        vm.InitAsync();
+        base.OnAppearing();
+        if (BindingContext is ViewModelShare vm)
+        {
+            await vm.LoadDataAsync();
+        }
     }
 }

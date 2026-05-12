@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO; // ADDED: Required for File and Stream operations!
 using System.Linq;
 using System.Reactive.Linq;
 using System.Text;
@@ -8,13 +9,17 @@ using Firebase.Auth.Providers;
 using Firebase.Auth.Repository;
 using Firebase.Auth;
 using Firebase.Database;
-using ProjectCompScience.Models;
 using Firebase.Database.Query;
+using ProjectCompScience.Models;
+using Microsoft.Maui.Storage;
 
 namespace ProjectCompScience.Services
 {
     internal class LocalDataService
     {
+        // Dynamically finds the safe storage folder for whichever device (PC or Android) the app is running on
+        public static readonly string EnvFilePath = Path.Combine(FileSystem.AppDataDirectory, "firebase.env");
+
         #region instance 
         private static LocalDataService? instance;
         static public LocalDataService GetLocalDataService()
@@ -22,234 +27,117 @@ namespace ProjectCompScience.Services
             if (instance == null)
             {
                 instance = new LocalDataService();
-                //instance.CreateFakeData();
             }
             return instance;
         }
-
         #endregion
 
         #region properties
         public List<StockShare> stockShares = new List<StockShare>();
 
-
         FirebaseAuthClient? auth;
-        FirebaseClient? client;
-        public AuthCredential? loginAuthUser; //This is to keep the logged in user credential, so we can logout later
+        public FirebaseClient? client;
+        public AuthCredential? loginAuthUser;
         public myUser fullDetaillsLoggedInUser;
         #endregion
 
-        public void Init()
+        public async Task InitAsync()
         {
-            string envPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", ".env");
-            DotNetEnv.Env.Load(envPath);
+            // Remove the Task.Run().Wait() wrapper! Just await it normally.
+            if (!File.Exists(EnvFilePath))
+            {
+                using Stream fileStream = await FileSystem.Current.OpenAppPackageFileAsync("firebase.env");
+                using FileStream writeStream = File.OpenWrite(EnvFilePath);
+                await fileStream.CopyToAsync(writeStream);
+            }
 
+            // Load the environment variables
+            DotNetEnv.Env.Load(EnvFilePath);
+
+            // Connect to Firebase
             var config = new FirebaseAuthConfig()
             {
-                ApiKey = Environment.GetEnvironmentVariable("ApiKey_firebase") ,
-                AuthDomain = Environment.GetEnvironmentVariable("AuthDomain_firebase"), //כתובת התחברות
-                Providers = new FirebaseAuthProvider[] //רשימת אפשריות להתחבר
-              {
-          new EmailProvider() //אנחנו נשתמש בשירות חינמי של התחברות עם מייל
-              },
-                UserRepository = new FileUserRepository("appUserData") //לא חובה, שם של קובץ בטלפון הפרטי שאפשר לשמור בו את מזהה ההתחברות כדי לא הכניס כל פעם את הסיסמא 
+                ApiKey = Environment.GetEnvironmentVariable("ApiKey_firebase"),
+                AuthDomain = Environment.GetEnvironmentVariable("AuthDomain_firebase"),
+                Providers = new FirebaseAuthProvider[]
+                {
+                    new EmailProvider()
+                },
+                UserRepository = new FileUserRepository("appUserData")
             };
-            auth = new FirebaseAuthClient(config); //ההתחברות
+            auth = new FirebaseAuthClient(config);
 
             string url = Environment.GetEnvironmentVariable("url_firebase");
-            client =
-              new FirebaseClient($"{url}", //כתובת מסד הנתונים
-              new FirebaseOptions
-              {
-                  AuthTokenAsyncFactory = () => Task.FromResult(auth.User.Credential.IdToken)// מזהה ההתחברות של המשתמש עם השרת, הנתון נשמר במכשיר
-              });
-        }
-
-        private void CreateFakeData()
-        {
-            StockShare ss1 = new StockShare()
-            {
-                Id = "1",
-                Company = new Company("Apple", "10c"),
-                classType = "A",
-                price = 100,
-                quantity = 4
-            };
-            StockShare ss2 = new StockShare()
-            {
-                Id = "2",
-                Company = new Company("NVIDIA", "15c"),
-                classType = "A",
-                price = 200,
-                quantity = 4
-            };
-            StockShare ss3 = new StockShare()
-            {
-                Id = "3",
-                Company = new Company("Microsoft", "20c"),
-                classType = "A",
-                price = 150,
-                quantity = 4
-            };
-            stockShares.Add(ss1);
-            stockShares.Add(ss2);
-            stockShares.Add(ss3);
-
-        }
-
-        public List<StockShare> GetStockShares()
-        {
-            return stockShares;
-        }
-
-        public void RemoveStockShare(StockShare ss)
-        {
-            stockShares.Remove(ss);
-        }
-
-        public async Task<bool> DeleteStockShareAsync(StockShare ItemToDelete)
-        {
-            if (stockShares != null)
-            {
-                if (stockShares.Contains(ItemToDelete))
+            client = new FirebaseClient($"{url}",
+                new FirebaseOptions
                 {
-                    stockShares.Remove(ItemToDelete);
-                    await Task.CompletedTask;
-                    return true;
-                }
-            }
-            return false;
+                    AuthTokenAsyncFactory = () => Task.FromResult(auth.User.Credential.IdToken)
+                });
         }
 
-        public bool AddStockShare(StockShare ss)
+        #region Authentication & User Profile
+        public async Task<(bool isSuccess, string errorMessage)> TryLogin(string userNameString, string passwordString)
         {
-            stockShares.Add(ss);
-            return true;
-        }
-
-        public async Task<bool> AddStockShareAsync(StockShare ItemToDelete)
-        {
-            if (stockShares != null)
-            {
-                try
-                {
-                    if (stockShares.Contains(ItemToDelete))
-                    {
-                        stockShares.Add(ItemToDelete);
-                        var result = stockShares
-                            .GroupBy(x => x.Id)
-                            .Select(g => new StockShare
-                            {
-                                Id = g.Key,
-                                Company = g.First().Company,
-                                classType = g.First().classType,
-                                price = g.First().price,
-                                quantity = g.Sum(x => x.quantity)
-                            });
-
-                        await Task.CompletedTask;
-                        return true;
-                    }
-
-
-                    else
-                    {
-                        stockShares.Add(ItemToDelete);
-                        await Task.CompletedTask;
-                        return true;
-                    }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                }
-            }
-
-            return false;
-        }
-
-        public async Task<bool> TryLogin(string userNameString, string passwordString)
-        {
-            if (userNameString == null || passwordString == null)
-            {
-                return false;
-            }
             try
             {
                 var authUser = await auth.SignInWithEmailAndPasswordAsync(userNameString, passwordString);
                 loginAuthUser = authUser.AuthCredential;
-                // We are logged in. Now go to DataBase and fetch data on user itself. Exampe 1 parameter: Name
                 string uid = auth.User.Uid;
-                string Name = await client
-                    .Child("users")
-                    .Child(uid)
-                    .Child("Name")
-                    .OnceSingleAsync<string>();
-                //!!need to add here the transactions of the user , and or stocks that he holds , with stockID and quantity!!
 
-                fullDetaillsLoggedInUser = new myUser()
+                var userDetails = await client.Child("users").Child(uid).Child("Details").OnceSingleAsync<myUser>();
+
+                if (userDetails != null)
                 {
-                    Email = auth.User.Info.Email,
-                    Id = uid,
-                    Name = Name
-                };
-                // Authentication successful 
-                // We keep the token or Credential in loginAuthUser, so we can erase it later in logout
-                // You can access the authenticated user's details via authUser.User
-                // you should create a new user or person
-                // Person person = new Person(){Email=authUser.User.info.Email, ...
-                // Don't put the password in the Person :)
+                    fullDetaillsLoggedInUser = userDetails;
+                }
+                else
+                {
+                    fullDetaillsLoggedInUser = new myUser() { Email = auth.User.Info.Email, Id = uid, Name = "Unknown", Balance = 10000 };
+                }
 
-                // ((App)Application.Current).SetAuthenticatedShell();
-
-                return true;
+                Preferences.Set("UserId", uid);
+                return (true, string.Empty);
             }
-            catch (FirebaseAuthException ex)
+            catch (FirebaseAuthException)
             {
-                // Authentication failed
-                return false;
+                // We caught a Firebase error! Send a clean message back.
+                return (false, "Incorrect email or password. Please try again.");
+            }
+            catch
+            {
+                return (false, "An unknown connection error occurred.");
             }
         }
 
-        public async Task<bool> TryRegister(string userNameString, string passwordString, string Name)
+        public async Task<(bool isSuccess, string errorMessage)> TryRegister(string userNameString, string passwordString, string Name)
         {
             try
             {
-                // 1: Create a user in Firebase with an Email and Password.
                 var respond = await auth.CreateUserWithEmailAndPasswordAsync(userNameString, passwordString);
-                // 2: User was created and also user is also Logged in
-                // 3: We Store the Uid of the user
+
                 fullDetaillsLoggedInUser = new myUser()
                 {
                     Email = respond.User.Info.Email,
                     Id = respond.User.Uid,
-                    Name = Name
+                    Name = Name,
+                    Balance = 10000.00
                 };
-                // 3: We can continue and add more details about the user but this time in the firebase Database
-                // Example: saving the full name
-                await client
-                    .Child("users")
-                    .Child(fullDetaillsLoggedInUser.Id)
-                    .PutAsync(new
-                    {
-                        Name = Name
-                        //Add here transaction history or stocks he holds
-                    });
 
-                return true;
+                await client.Child("users").Child(fullDetaillsLoggedInUser.Id).Child("Details").PutAsync(fullDetaillsLoggedInUser);
+                Preferences.Set("UserId", fullDetaillsLoggedInUser.Id);
+
+                return (true, string.Empty);
             }
-            catch (Exception ex)
+            catch (FirebaseAuthException)
             {
-                await Application.Current.MainPage.DisplayAlert(
-                    "Error",
-                    ex.Message,
-                    "OK"
-                );
-
-                return false;
+   
+                return (false, "Registration failed. This email may already be in use, or your password is too weak.");
+            }
+            catch
+            {
+                return (false, "An unknown connection error occurred.");
             }
         }
-
 
         public bool Logout()
         {
@@ -258,6 +146,7 @@ namespace ProjectCompScience.Services
                 auth.SignOut();
                 loginAuthUser = null;
                 fullDetaillsLoggedInUser = null;
+                Preferences.Remove("UserId");
                 return true;
             }
             catch
@@ -265,8 +154,129 @@ namespace ProjectCompScience.Services
                 return false;
             }
         }
+        public async Task RemovePortfolioItemAsync(string userId, string ticker)
+        {
+            await client
+                .Child("users")
+                .Child(userId)
+                .Child("Portfolio")
+                .Child(ticker)
+                .DeleteAsync();
+        }
+        #endregion
 
 
+        #region Firebase Economy Methods
+        public async Task<double> GetUserBalanceAsync(string userId)
+        {
+            try
+            {
+                return await client
+                    .Child("users")
+                    .Child(userId)
+                    .Child("Details")
+                    .Child("Balance")
+                    .OnceSingleAsync<double>();
+            }
+            catch
+            {
+                return 10000.00;
+            }
+        }
 
+        public async Task UpdateUserBalanceAsync(string userId, double newBalance)
+        {
+            await client
+                .Child("users")
+                .Child(userId)
+                .Child("Details")
+                .Child("Balance")
+                .PutAsync(newBalance);
+
+            if (fullDetaillsLoggedInUser != null)
+            {
+                fullDetaillsLoggedInUser.Balance = newBalance;
+            }
+        }
+
+        public async Task RecordTransactionAsync(string userId, Transaction transaction)
+        {
+            await client
+                .Child("users")
+                .Child(userId)
+                .Child("Transactions")
+                .PostAsync(transaction);
+        }
+
+        public async Task UpdatePortfolioAsync(string userId, PortfolioItem item)
+        {
+            await client
+                .Child("users")
+                .Child(userId)
+                .Child("Portfolio")
+                .Child(item.Ticker)
+                .PutAsync(item);
+        }
+
+        public async Task<List<PortfolioItem>> GetUserPortfolioAsync(string userId)
+        {
+            try
+            {
+                var items = await client
+                    .Child("users")
+                    .Child(userId)
+                    .Child("Portfolio")
+                    .OnceAsync<PortfolioItem>();
+
+                return items.Select(x => x.Object).ToList();
+            }
+            catch
+            {
+                return new List<PortfolioItem>();
+            }
+        }
+
+        public async Task<List<Transaction>> GetUserTransactionsAsync(string userId)
+        {
+            try
+            {
+                var items = await client
+                    .Child("users")
+                    .Child(userId)
+                    .Child("Transactions")
+                    .OnceAsync<Transaction>();
+
+               
+                return items
+                    .Select(x => x.Object)
+                    .OrderByDescending(t => t.Date) 
+                    .ToList();
+            }
+            catch
+            {
+                return new List<Transaction>();
+            }
+        }
+
+
+        public async Task<int> GetOwnedSharesAsync(string userId, string ticker)
+        {
+            try
+            {
+                var allTransactions = await GetUserTransactionsAsync(userId);
+
+                var stockHistory = allTransactions.Where(t => t.Ticker == ticker).ToList();
+
+                int totalBought = stockHistory.Where(t => t.TransactionType == "BUY").Sum(t => t.Shares);
+                int totalSold = stockHistory.Where(t => t.TransactionType == "SELL").Sum(t => t.Shares);
+
+                return totalBought - totalSold;
+            }
+            catch
+            {
+                return 0; // If anything fails, assume they own 0 shares to be safe.
+            }
+        }
+        #endregion
     }
 }

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ProjectCompScience.View.BuyShares"
+             xmlns:models="clr-namespace:ProjectCompScience.Models"
+             Title="BuyShares">
+    <VerticalStackLayout>
+        <Grid RowDefinitions="Auto, Auto, *">
+
+            <!-- 1. Search Bar -->
+            <SearchBar x:Name="StockSearch"
+               Placeholder="Search company..."
+               SearchCommand="{Binding SearchStocksCommand}"
+               SearchCommandParameter="{Binding Source={x:Reference StockSearch}, Path=Text}" />
+
+            <!-- 2. Search Results (Overlay/Dropdown style) -->
+            <CollectionView ItemsSource="{Binding FilteredStocks}"
+                    SelectionMode="Single"
+                    SelectionChangedCommand="{Binding SelectStockCommand}"
+                    SelectionChangedCommandParameter="{Binding SelectedItem, Source={RelativeSource Self}}"
+                    ZIndex="10"
+                    BackgroundColor="#333333"
+                    MaximumHeightRequest="200"
+                    Grid.Row="1">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:StockSymbol">
+                        <HorizontalStackLayout Padding="10" Spacing="10">
+                            <Label Text="{Binding Ticker}" FontAttributes="Bold" TextColor="White"/>
+                            <Label Text="{Binding Title}" TextColor="Gray"/>
+                        </HorizontalStackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <!-- 3. The Details Header (Matching image_81b5b7.png) -->
+        </Grid>
+    </VerticalStackLayout>
+</ContentPage>

@@ -11,13 +11,14 @@
     >
 
     <ShellContent
+        Title="Login"
+        ContentTemplate="{DataTemplate View:Login}"
+        Route="Login" />
+    
+    <ShellContent
         Title="Register"
         ContentTemplate="{DataTemplate View:Register}"
         Route="Register" />
     
-    <ShellContent
-        Title="Login"
-        ContentTemplate="{DataTemplate View:Login}"
-        Route="Login" />
 
 </Shell>

@@ -8,7 +8,7 @@ using System.Windows.Input;
 
 namespace ProjectCompScience.ViewModels
 {
-    internal class ViewModelLoginPage
+    internal class ViewModelLoginPage : ViewModelBase
     {
         #region Getters & Setters
         private string emailInput;
@@ -24,6 +24,13 @@ namespace ProjectCompScience.ViewModels
             get { return passwordInput; }
             set { passwordInput = value; }
         }
+
+        private bool isBusy;
+        public bool IsBusy
+        {
+            get { return isBusy; }
+            set { isBusy = value; OnPropertyChanged(); }
+        }
         #endregion
 
         #region Commands Declaration
@@ -34,20 +41,43 @@ namespace ProjectCompScience.ViewModels
         #region Constructor
         public ViewModelLoginPage()
         {
-            EmailInput = "monke@zoo.com";
+            EmailInput = "supermike@gmail.com";
             SubmitLoginCommand = new Command(async () => await Login());
             GoRegisterCommand = new Command(async () => await Shell.Current.GoToAsync("//Register"));
         }
         #endregion
 
         #region Methods / Functions
-        private async Task Login()//
+        private async Task Login()
         {
-            bool successed = await LocalDataService.GetLocalDataService().TryLogin(emailInput, passwordInput);
-            if (successed)
+            if (string.IsNullOrWhiteSpace(EmailInput) || string.IsNullOrWhiteSpace(PasswordInput))
             {
-                ((App)Application.Current).SetAuthenticatedShell();
-                // This will also navigate to the 1st page int the AuthenticatedShell 
+                await App.Current.MainPage.DisplayAlert("Hold on", "Please enter both an email and a password.", "OK");
+                return;
+            }
+
+            //  PREVENT SPAMMING
+            if (IsBusy) return;
+            IsBusy = true;
+
+            try
+            {
+                var result = await LocalDataService.GetLocalDataService().TryLogin(EmailInput, PasswordInput);
+
+                if (result.isSuccess)
+                {
+                    ((App)Application.Current).SetAuthenticatedShell();
+                    await Shell.Current.GoToAsync("//StockSharesPage");
+                }
+                else
+                {
+ 
+                    await App.Current.MainPage.DisplayAlert("Login Failed", result.errorMessage, "OK");
+                }
+            }
+            finally
+            {
+                IsBusy = false;
             }
         }
         #endregion

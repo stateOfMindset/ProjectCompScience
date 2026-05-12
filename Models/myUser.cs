@@ -11,7 +11,7 @@ namespace ProjectCompScience.Models
         public string? Email { get; set; }
         public string? Id { get; set; }
         public string? Name { get; set; }
-
+        public double Balance { get; set; } = 10000.00;
 
 
 

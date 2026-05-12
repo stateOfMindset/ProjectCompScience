@@ -1,430 +1,158 @@
 ﻿using ProjectCompScience.Services;
-using ProjectCompScience.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
-
 namespace ProjectCompScience.ViewModels
 {
-    class ViewModelRegister : ViewModelBase
+    internal class ViewModelRegister : ViewModelBase
     {
-        #region Getters & Setters
+        #region Fields
         private string emailInput;
-        public string EmailInput
-        {
-            get { return emailInput; }
-            set { emailInput = value; }
-        }
-
         private string passwordInput1;
-        public string PasswordInput1
-        {
-            get { return passwordInput1; }
-            set { passwordInput1 = value; }
-        }
-
-        private string passwordInput2;
-        public string PasswordInput2
-        {
-            get { return passwordInput2; }
-            set
-            {
-                passwordInput2 = value;
-                if (passwordInput1 != "" && passwordInput1 == passwordInput2)
-                {
-                    IsRegisterButtonEnabled = true;
-                }
-                else
-                {
-                    IsRegisterButtonEnabled = false;
-                }
-
-            }
-        }
-
         private string fullName;
+        private string errorLabelNameText;
+        private string errorLabelEmailField;
+        private string errorLabelPasswordField;
+        private bool isVisiblePasswordField = true;
+
+        // --- THE LOCK FIELD ---
+        private bool isBusy;
+        #endregion
+
+        #region Properties
         public string FullName
         {
-            get { return fullName; }
-            set { fullName = value; }
+            get => fullName;
+            set { fullName = value; OnPropertyChanged(); ValidateName(); }
         }
 
-        private bool isRegisterButtonEnabled;
-        public bool IsRegisterButtonEnabled
+        public string EmailInput
         {
-            get { return isRegisterButtonEnabled; }
-            set
-            {
-                isRegisterButtonEnabled = value;
-                OnPropertyChanged(nameof(IsRegisterButtonEnabled));
-            }
+            get => emailInput;
+            set { emailInput = value; OnPropertyChanged(); ValidateEmail(); }
         }
 
+        public string PasswordInput1
+        {
+            get => passwordInput1;
+            set { passwordInput1 = value; OnPropertyChanged(); ValidatePassword(); }
+        }
+
+        public bool IsVisiblePasswordField
+        {
+            get => isVisiblePasswordField;
+            set { isVisiblePasswordField = value; OnPropertyChanged(); }
+        }
+
+        public string ErrorLabelNameText
+        {
+            get => errorLabelNameText;
+            set { errorLabelNameText = value; OnPropertyChanged(); }
+        }
+
+        public string ErrorLabelEmailField
+        {
+            get => errorLabelEmailField;
+            set { errorLabelEmailField = value; OnPropertyChanged(); }
+        }
+
+        public string ErrorLabelPasswordField
+        {
+            get => errorLabelPasswordField;
+            set { errorLabelPasswordField = value; OnPropertyChanged(); }
+        }
+
+        // --- THE LOCK PROPERTY ---
+        public bool IsBusy
+        {
+            get => isBusy;
+            set { isBusy = value; OnPropertyChanged(); }
+        }
         #endregion
 
-        #region Commands Declaration
-        public ICommand SubmitRegisterCommand { get; set; }
-        public ICommand GoLoginCommand { get; set; }
-        public ICommand ButtonShowPasswordCommand { get; set; }
+        #region Commands
+        public ICommand SubmitRegisterCommand { get; }
+        public ICommand GoLoginCommand { get; }
+        public ICommand ButtonShowPasswordCommand { get; }
         #endregion
 
-        #region Constuctor
+        #region Constructor
         public ViewModelRegister()
         {
             SubmitRegisterCommand = new Command(async () => await Register());
             GoLoginCommand = new Command(async () => await Shell.Current.GoToAsync("//Login"));
+            ButtonShowPasswordCommand = new Command(() => IsVisiblePasswordField = !IsVisiblePasswordField);
         }
         #endregion
 
-        #region Methods / Functions
+        #region Validation Logic
+        private void ValidateName()
+        {
+            if (string.IsNullOrWhiteSpace(FullName)) ErrorLabelNameText = "Name is required";
+            else if (FullName.Length < 3) ErrorLabelNameText = "Name too short";
+            else ErrorLabelNameText = "";
+        }
+
+        private void ValidateEmail()
+        {
+            if (string.IsNullOrWhiteSpace(EmailInput)) ErrorLabelEmailField = "Email is required";
+            else if (!Regex.IsMatch(EmailInput, @"^[^@\s]+@[^@\s]+\.[^@\s]+$")) ErrorLabelEmailField = "Invalid email format";
+            else ErrorLabelEmailField = "";
+        }
+
+        private void ValidatePassword()
+        {
+            if (string.IsNullOrWhiteSpace(PasswordInput1)) ErrorLabelPasswordField = "Password is required";
+            else if (PasswordInput1.Length < 6) ErrorLabelPasswordField = "Minimum 6 characters"; // Firebase requires 6!
+            else ErrorLabelPasswordField = "";
+        }
+        #endregion
+
+        #region Registration Logic
         private async Task Register()
         {
-            bool successed = await LocalDataService.GetLocalDataService().TryRegister(EmailInput, PasswordInput1, FullName);
-            if (successed)
+            //  Force validations to run just in case the user clicked Register on an empty screen
+            ValidateName();
+            ValidateEmail();
+            ValidatePassword();
+
+            //  Check if any errors popped up from the validations
+            if (!string.IsNullOrEmpty(ErrorLabelNameText) ||
+                !string.IsNullOrEmpty(ErrorLabelEmailField) ||
+                !string.IsNullOrEmpty(ErrorLabelPasswordField))
             {
-                ((App)Application.Current).SetAuthenticatedShell();
-                await Shell.Current.GoToAsync("//StockSharesPage");
+                return;
             }
-            else
+
+            //  PREVENT BUTTON SPAMMING
+            if (IsBusy) return;
+            IsBusy = true;
+
+            try
             {
+
+                var result = await LocalDataService.GetLocalDataService().TryRegister(EmailInput, PasswordInput1, FullName);
+
+                if (result.isSuccess)
+                {
+                    ((App)Application.Current).SetAuthenticatedShell();
+                    await Shell.Current.GoToAsync("//StockSharesPage");
+                }
+                else
+                {
+  
+                    await App.Current.MainPage.DisplayAlert("Registration Failed", result.errorMessage, "Got it");
+                }
+            }
+            finally
+            {
+                IsBusy = false;
             }
         }
         #endregion
     }
 }
-
-//{
-//        public ViewModelRegister()
-//{
-//    initiateInstances();
-
-//}
-
-
-
-//#region nameFieldPropfulls
-//private string nameField;
-
-//public string NameField
-//{
-//    get { return nameField; }
-//    set
-//    {
-//        nameField = value;
-//        validateName();
-//        OnPropertyChanged();
-
-//    }
-//}
-
-//private string errorLabelNameText;
-
-//public string ErrorLabelNameText
-//{
-//    get { return errorLabelNameText; }
-//    set
-//    {
-//        if (errorLabelNameText != value)
-//        {
-//            errorLabelNameText = value;
-//            OnPropertyChanged();
-//        }
-//    }
-//}
-
-//#endregion
-
-//#region Name-Related-Methods
-//private bool validateName()
-//{
-//    string _srrorLabelName = "";
-//    bool returnVal = true;
-
-//    if (string.IsNullOrWhiteSpace(NameField))
-//    {
-//        _srrorLabelName += "The Name is Empty! ";
-//        returnVal = false;
-//    }
-//    else if (nameField.Length < 3)
-//    {
-//        _srrorLabelName += "The Name is Too Short! ";
-//        returnVal = false;
-//    }
-//    else if (nameField.Length > 10)
-//    {
-//        _srrorLabelName += "The Name is Too Long! ";
-//        returnVal = false;
-//    }
-
-//    ErrorLabelNameText = _srrorLabelName;
-
-//    return returnVal;
-
-//}
-//#endregion
-
-//#region EmailFieldPropfulls
-
-//private string emailFieldText;
-
-//public string EmailFieldText
-//{
-//    get { return emailFieldText; }
-//    set
-//    {
-//        emailFieldText = value;
-//        validateEmail();
-//        OnPropertyChanged();
-
-//    }
-//}
-
-
-//private string errorLabelEmailField;
-
-//public string ErrorLabelEmailField
-//{
-//    get { return errorLabelEmailField; }
-//    set
-//    {
-//        if (errorLabelEmailField != value)
-//        {
-//            errorLabelEmailField = value;
-//            OnPropertyChanged();
-//        }
-//    }
-//}
-
-
-//#endregion
-
-//#region Email-Related-Methods
-
-//private bool validateEmail()
-//{
-//    string _errorLabelEmailText = "";
-//    bool returnVal = true;
-
-//    if (string.IsNullOrWhiteSpace(EmailFieldText))
-//    {
-//        _errorLabelEmailText += "The Email is Empty! ";
-//        returnVal = false;
-//    }
-//    else if (!IsValidEmail())
-//    {
-//        _errorLabelEmailText += "Invalid Email ";
-//        returnVal = false;
-//    }
-
-//    ErrorLabelEmailField = _errorLabelEmailText;
-
-//    return returnVal;
-
-//}
-
-//private bool IsValidEmail()
-//{
-//    try
-//    {
-//        var addr = new System.Net.Mail.MailAddress(EmailFieldText);
-//        return addr.Address == EmailFieldText;
-//    }
-//    catch
-//    {
-//        return false;
-//    }
-//}
-
-//#endregion
-
-//#region PasswordFieldPropfull
-
-//private string passwordField;
-
-//public string PasswordField
-//{
-//    get { return passwordField; }
-//    set
-//    {
-//        passwordField = value;
-//        validatePassword();
-//        OnPropertyChanged();
-//    }
-//}
-
-//private string errorLabelPasswordField;
-
-//public string ErrorLabelPasswordField
-//{
-//    get { return errorLabelPasswordField; }
-//    set
-//    {
-//        errorLabelPasswordField = value;
-//        OnPropertyChanged();
-//    }
-//}
-
-//private bool isVisiblePasswordField;
-
-//public bool IsVisiblePasswordField
-//{
-//    get { return isVisiblePasswordField; }
-//    set
-//    {
-//        isVisiblePasswordField = value;
-//        PasswordVisibilityChanged();
-//        OnPropertyChanged();
-//    }
-//}
-
-
-//#endregion
-
-//#region Password-Related-Methods
-
-//private bool validatePassword()
-//{
-//    string _errorPassword = "";
-//    bool isValid = true;
-
-//    if (string.IsNullOrWhiteSpace(PasswordField))
-//    {
-//        _errorPassword += "The Password is Empty !";
-//        isValid = false;
-//    }
-//    if (PasswordField.Length < 8)
-//    {
-//        _errorPassword += "Password must be at least 8 characters long. ";
-//        isValid = false;
-//    }
-
-//    if (!Regex.IsMatch(PasswordField, "[A-Z]"))
-//    {
-//        _errorPassword += "Password must contain at least one uppercase letter. ";
-//        isValid = false;
-//    }
-
-//    if (!Regex.IsMatch(PasswordField, "[a-z]"))
-//    {
-//        _errorPassword += "Password must contain at least one lowercase letter. ";
-//        isValid = false;
-//    }
-
-//    if (!Regex.IsMatch(PasswordField, "[0-9]"))
-//    {
-//        _errorPassword += "Password must contain at least one digit. ";
-//        isValid = false;
-//    }
-
-//    if (!Regex.IsMatch(PasswordField, "[^a-zA-Z0-9]"))
-//    {
-//        _errorPassword += "Password must contain at least one special character.";
-//        isValid = false;
-//    }
-
-//    if (PasswordField.ToLowerInvariant() == "password" || PasswordField == "12345678")
-//    {
-//        _errorPassword += "Avoid using common and easily guessable passwords.";
-//        isValid = false;
-//    }
-
-//    ErrorLabelPasswordField = _errorPassword;
-//    return isValid;
-//}
-
-//private void ShowPassword()
-//{
-
-//    IsVisiblePasswordField = !IsVisiblePasswordField;
-//}
-
-//private void PasswordVisibilityChanged()
-//{
-
-//}
-
-//#endregion
-
-//#region ConfirmPasswordFieldPropfull
-
-//private string confirmPasswordField;
-
-//public string ConfirmPasswordField
-//{
-//    get { return confirmPasswordField; }
-//    set
-//    {
-//        confirmPasswordField = value;
-//        validateConfirmPassword();
-//        OnPropertyChanged();
-//    }
-//}
-
-//private string errorLabelConfirmPasswordField;
-
-//public string ErrorLabelConfirmPasswordField
-//{
-//    get { return errorLabelConfirmPasswordField; }
-//    set
-//    {
-//        errorLabelConfirmPasswordField = value;
-//        OnPropertyChanged();
-//    }
-//}
-
-//private bool isVisibleConfirmPasswordField;
-
-//public bool IsVisibleConfirmPasswordField
-//{
-//    get { return isVisibleConfirmPasswordField; }
-//    set
-//    {
-//        isVisibleConfirmPasswordField = value;
-//        OnPropertyChanged();
-//    }
-//}
-
-
-
-//#endregion
-
-//#region Confirm-Password-Related-Methods
-
-//private bool validateConfirmPassword()
-//{
-//    string _errorPassword = "";
-//    bool returnVal = true;
-
-//    if (string.IsNullOrWhiteSpace(ConfirmPasswordField))
-//    {
-//        _errorPassword += "The Password is Empty !";
-//        returnVal = false;
-//    }
-//    if (!ConfirmPasswordField.Equals(PasswordField))
-//    {
-//        _errorPassword += "The Passwords Do Not Match.";
-//        returnVal = false;
-//    }
-//    ErrorLabelConfirmPasswordField = _errorPassword;
-//    return returnVal;
-//}
-
-//private void ShowConfirmPassword()
-//{
-//    IsVisibleConfirmPasswordField = !IsVisibleConfirmPasswordField;
-//}
-
-//#endregion
-
-//#region Commands
-//public ICommand ButtonRegisterCommand { get; set; }
-//public ICommand ButtonShowPasswordCommand { get; set; }
-//public ICommand ButtonShowConfirmPasswordCommand { get; set; }
-
-
-

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ProjectCompScience.View.StockDetails"
+             BackgroundColor="#1E1E1E"
+             Title="Details">
+
+    <VerticalStackLayout Padding="20" Spacing="15">
+
+        <HorizontalStackLayout Spacing="10">
+            <Border Stroke="#333" BackgroundColor="#2D2D2D" Padding="10,5">
+                <Label Text="{Binding Ticker}" FontAttributes="Bold" TextColor="White" />
+            </Border>
+            <Border Stroke="#333" BackgroundColor="#2D2D2D" Padding="10,5">
+                <Label Text="{Binding CompanyName}" TextColor="#A0A0A0" />
+            </Border>
+        </HorizontalStackLayout>
+
+        <HorizontalStackLayout Spacing="10" Margin="0,10,0,0">
+            <Border Stroke="#333" BackgroundColor="#2D2D2D" Padding="10,5">
+                <Label Text="{Binding CurrentPrice}" FontAttributes="Bold" TextColor="White" />
+            </Border>
+            <Border Stroke="{Binding TrendColor}" BackgroundColor="#122A12" Padding="10,5">
+                <Label Text="{Binding PercentageChange}" 
+                       TextColor="{Binding TrendColor}" 
+                       FontAttributes="Bold" />
+            </Border>
+        </HorizontalStackLayout>
+
+        <FlexLayout JustifyContent="SpaceBetween" Margin="0,20,0,10">
+            <Button Text="1W" Command="{Binding ChangeTimeRangeCommand}" CommandParameter="1W" BackgroundColor="Transparent" TextColor="#A0A0A0" />
+            <Button Text="2W" Command="{Binding ChangeTimeRangeCommand}" CommandParameter="2W" BackgroundColor="Transparent" TextColor="#A0A0A0"/>
+            <Button Text="1M" Command="{Binding ChangeTimeRangeCommand}" CommandParameter="1M" BackgroundColor="Transparent" TextColor="#A0A0A0" />
+            <Button Text="2M" Command="{Binding ChangeTimeRangeCommand}" CommandParameter="2M" BackgroundColor="Transparent" TextColor="#A0A0A0" />
+            <Button Text="3M" Command="{Binding ChangeTimeRangeCommand}" CommandParameter="3M" BackgroundColor="Transparent" TextColor="#A0A0A0" />
+        </FlexLayout>
+
+        <Border Stroke="#333" BackgroundColor="#252525" HeightRequest="250">
+            <GraphicsView 
+                x:Name="StockGraphView"
+                Drawable="{Binding MyGraphDrawable}" 
+                HorizontalOptions="Fill" 
+                VerticalOptions="Fill" />
+        </Border>
+
+        <!-- Main Action Bar (Side-by-Side) -->
+        <Grid ColumnDefinitions="*, *" ColumnSpacing="15" Margin="0,15,0,0">
+            <!-- BUY BUTTON -->
+            <Button Grid.Column="0"
+                    Text="BUY STOCK" 
+                    Command="{Binding BuyStockCommand}" 
+                    BackgroundColor="#2ECC71"
+                    TextColor="White"
+                    FontAttributes="Bold"
+                    CornerRadius="8"
+                    HeightRequest="50"/>
+
+            <!-- AI PREDICT BUTTON -->
+            <Button Grid.Column="1"
+                    Text="PREDICT AI" 
+                    Command="{Binding PredictFutureCommand}" 
+                    BackgroundColor="#9B59B6"
+                    TextColor="White"
+                    FontAttributes="Bold"
+                    CornerRadius="8"
+                    HeightRequest="50"/>
+        </Grid>
+
+        <!-- NEW: CONDITIONAL SELL BUTTON -->
+        <!-- The IsVisible binding hides this entirely unless they came from the Portfolio -->
+        <Button Text="SELL STOCK" 
+                Command="{Binding SellStockCommand}" 
+                IsVisible="{Binding IsFromPortfolio}"
+                BackgroundColor="#E74C3C"
+                TextColor="White"
+                FontAttributes="Bold"
+                CornerRadius="8"
+                HeightRequest="50"
+                Margin="0,0,0,0"/>
+
+    </VerticalStackLayout>
+</ContentPage>

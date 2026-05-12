@@ -2,100 +2,85 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="ProjectCompScience.View.Register"
-             Style="{StaticResource GradientPageStyle}"
+             Style="{StaticResource SubtleGraphBackground}"
              Title="Register">
-    <ScrollView>
-        <Frame Style="{StaticResource FrameRegister}">
-            <Frame.Background>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                    <GradientStop Color="Orange" Offset="0.0" />
-                    <GradientStop Color="Gold" Offset="0.05" />
-                    <GradientStop Color="Orange" Offset="0.1" />
-                    <GradientStop Color="Gold" Offset="0.15" />
-                    <GradientStop Color="Orange" Offset="0.2" />
-                    <GradientStop Color="Gold" Offset="0.25" />
-                    <GradientStop Color="Orange" Offset="0.3" />
-                    <GradientStop Color="Gold" Offset="0.35" />
-                    <GradientStop Color="Orange" Offset="0.4" />
-                    <GradientStop Color="Gold" Offset="0.45" />
-                    <GradientStop Color="Orange" Offset="0.5" />
-                    <GradientStop Color="Gold" Offset="0.55" />
-                    <GradientStop Color="Orange" Offset="0.6" />
-                    <GradientStop Color="Gold" Offset="0.65" />
-                    <GradientStop Color="Orange" Offset="0.7" />
-                    <GradientStop Color="Gold" Offset="0.75" />
-                    <GradientStop Color="Orange" Offset="0.8" />
-                    <GradientStop Color="Gold" Offset="0.85" />
-                    <GradientStop Color="Orange" Offset="0.9" />
-                    <GradientStop Color="Gold" Offset="0.95" />
-                    <GradientStop Color="Orange" Offset="1" />
-                </LinearGradientBrush>
-            </Frame.Background>
-            <VerticalStackLayout Padding="30" Spacing="25" WidthRequest="480" HorizontalOptions="Center">
 
-                <!-- Name -->
+    <Grid>
+        <AbsoluteLayout IsEnabled="False" Opacity="0.05">
+            <BoxView Color="Lime" AbsoluteLayout.LayoutBounds="0.2,0,1,1" AbsoluteLayout.LayoutFlags="PositionProportional, HeightProportional"/>
+            <BoxView Color="Lime" AbsoluteLayout.LayoutBounds="0.4,0,1,1" AbsoluteLayout.LayoutFlags="PositionProportional, HeightProportional"/>
+            <BoxView Color="Lime" AbsoluteLayout.LayoutBounds="0.6,0,1,1" AbsoluteLayout.LayoutFlags="PositionProportional, HeightProportional"/>
+            <BoxView Color="Lime" AbsoluteLayout.LayoutBounds="0.8,0,1,1" AbsoluteLayout.LayoutFlags="PositionProportional, HeightProportional"/>
+            <BoxView Color="Lime" AbsoluteLayout.LayoutBounds="0,0.2,1,1" AbsoluteLayout.LayoutFlags="PositionProportional, WidthProportional"/>
+            <BoxView Color="Lime" AbsoluteLayout.LayoutBounds="0,0.4,1,1" AbsoluteLayout.LayoutFlags="PositionProportional, WidthProportional"/>
+            <BoxView Color="Lime" AbsoluteLayout.LayoutBounds="0,0.6,1,1" AbsoluteLayout.LayoutFlags="PositionProportional, WidthProportional"/>
+            <BoxView Color="Lime" AbsoluteLayout.LayoutBounds="0,0.8,1,1" AbsoluteLayout.LayoutFlags="PositionProportional, WidthProportional"/>
+        </AbsoluteLayout>
 
-                <Entry Text="{Binding FullName}" Placeholder="Name" Style="{StaticResource EnRegister}" />
-                <Label Text="{Binding ErrorLabelNameText}"  Style="{StaticResource ErrorLabelStyle}"/>
+        <ScrollView>
+            <Border MaximumWidthRequest="450" 
+                    HorizontalOptions="Center" 
+                    VerticalOptions="Center"
+                    BackgroundColor="#222222"
+                    Stroke="#333333"
+                    StrokeThickness="1"
+                    Padding="40"
+                    Margin="20,50">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="12" />
+                </Border.StrokeShape>
 
-                <!-- Email -->
+                <VerticalStackLayout Spacing="15">
+                    <Label Text="CREATE ACCOUNT" FontSize="28" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" Margin="0,0,0,20"/>
 
-                <Entry Placeholder="Email" Text="{Binding EmailInput}" Style="{StaticResource EnRegister}" />
-                
-                <Label Text="{Binding ErrorLabelEmailField}" Style="{StaticResource ErrorLabelStyle}" />
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="FULL NAME" TextColor="#A0A0A0" FontSize="11" />
+                        <Border Style="{StaticResource InputContainer}">
+                            <Entry Text="{Binding FullName}" Style="{StaticResource ModernEntry}" Placeholder="John Doe"/>
+                        </Border>
+                        <Label Text="{Binding ErrorLabelNameText}" Style="{StaticResource ErrorLabelStyle}"/>
+                    </VerticalStackLayout>
 
-                <!-- Password -->
-                <Grid ColumnDefinitions="*,Auto">
-                    <Entry
-                    Style="{StaticResource EnRegister}"
-                    Grid.Column="0"
-                    IsPassword ="{Binding IsVisiblePasswordField}"
-                    Placeholder="Enter Password"
-                    Text="{Binding PasswordInput1}"
-                    
-                />
-                    <Button
-                    Style="{StaticResource RegisterPageButtons}"
-                    Grid.Column="1"
-                    Command="{Binding ButtonShowPasswordCommand}"
-   
-                    Text="👀"
-                />
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="EMAIL ADDRESS" TextColor="#A0A0A0" FontSize="11" />
+                        <Border Style="{StaticResource InputContainer}">
+                            <Entry Text="{Binding EmailInput}" Style="{StaticResource ModernEntry}" Placeholder="email@example.com"/>
+                        </Border>
+                        <Label Text="{Binding ErrorLabelEmailField}" Style="{StaticResource ErrorLabelStyle}" />
+                    </VerticalStackLayout>
 
-                </Grid>
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="PASSWORD" TextColor="#A0A0A0" FontSize="11" />
 
-                <Label Style="{StaticResource ErrorLabelStyle}" Text="{Binding ErrorLabelPasswordField}" />
+                        <Border Style="{StaticResource InputContainer}">
+                            <Grid ColumnDefinitions="*,Auto">
 
+                                <Entry Grid.Column="0" 
+                   Text="{Binding PasswordInput1}" 
+                   Style="{StaticResource ModernEntry}" 
+                   IsPassword="{Binding IsVisiblePasswordField}" 
+                   Placeholder="••••••••" />
 
-                <!-- Confirm Password -->
-                <Grid ColumnDefinitions="*,Auto">
-                    <Entry
-                    Style="{StaticResource EnRegister}"
-                   Text="{Binding PasswordInput2}"
-                    Grid.Column="0"
-                    IsPassword="{Binding IsVisibleConfirmPasswordField}"                 
-                    Placeholder="Confirm Password"
-                />
-                    <Button
-                    Style="{StaticResource RegisterPageButtons}"
-                    Grid.Column="1"
-                    Command="{Binding ButtonShowConfirmPasswordCommand}"                
-                    Text="👀"
-                />
+                                <Button Grid.Column="1" 
+                    Command="{Binding ButtonShowPasswordCommand}" 
+                    Text="VIEW" 
+                    BackgroundColor="Transparent" 
+                    TextColor="#A0A0A0" 
+                    FontSize="10" 
+                    BorderWidth="0" 
+                    Padding="15,0" 
+                    Margin="0"/>
+                            </Grid>
+                        </Border>
 
-                </Grid>
+                        <Label Text="{Binding ErrorLabelPasswordField}" Style="{StaticResource ErrorLabelStyle}" />
+                    </VerticalStackLayout>
 
-                <Label Text="{Binding ErrorLabelConfirmPasswordField}" Style="{StaticResource ErrorLabelStyle}" />
+                    <Button Text="REGISTER" Command="{Binding SubmitRegisterCommand}" Style="{StaticResource PrimaryButton}" Margin="0,20,0,0"/>
 
-                <!-- Register Button -->
-                <Button Text="Register"
-                    Style="{StaticResource RegisterPageButtons}"
-                    Command="{Binding SubmitRegisterCommand}"
-                   ></Button>
-
-                <!-- Go to Login Page Button -->
-                <Button BackgroundColor="Transparent" TextColor="blue" Command="{Binding GoLoginCommand}" Text="Go Login"/>
-            </VerticalStackLayout>
-        </Frame>
-    </ScrollView>
+                    <Button BackgroundColor="Transparent" TextColor="#4CAF50" Command="{Binding GoLoginCommand}" Text="Already have an account? Login"/>
+                </VerticalStackLayout>
+            </Border>
+        </ScrollView>
+    </Grid>
 </ContentPage>

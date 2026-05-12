@@ -11,9 +11,9 @@
     >
 
     <ShellContent
-        Title="addNewShares"
-        ContentTemplate="{DataTemplate View:addNewShares}"
-        Route="addNewShares" />
+        Title="buyShares"
+        ContentTemplate="{DataTemplate View:BuyShares}"
+        Route="BuyShares" />
 
     <ShellContent
     Title="StockSharesPage"
