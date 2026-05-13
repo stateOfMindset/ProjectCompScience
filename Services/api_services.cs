@@ -6,8 +6,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Text.Json;
-
-// --- NEW USINGS FOR FIREBASE ---
 using Firebase.Database;
 using Firebase.Database.Query;
 
@@ -99,7 +97,6 @@ namespace ProjectCompScience.Services
 
         #region Firebase Economy Methods
 
-        // Helper to format emails safely for Firebase
         private string SanitizeEmail(string email) => email.Replace(".", "_");
 
         // GET BALANCE
@@ -114,7 +111,6 @@ namespace ProjectCompScience.Services
                     .Child("Balance")
                     .OnceSingleAsync<double>();
 
-                // If they have 0 or don't exist yet, seed them with $10,000!
                 if (balance == 0)
                 {
                     await UpdateUserBalanceAsync(userEmail, 10000.00);
@@ -139,7 +135,6 @@ namespace ProjectCompScience.Services
                 .PutAsync(newBalance);
         }
 
-        // RECORD TRANSACTION
         public async Task RecordTransactionAsync(string userEmail, Transaction transaction)
         {
             string safeEmail = SanitizeEmail(userEmail);
@@ -155,7 +150,7 @@ namespace ProjectCompScience.Services
         {
             string safeEmail = SanitizeEmail(userEmail);
 
-            // We use the Ticker (e.g., "AAPL") as the key so it's easy to look up later
+   
             await _firebase
                 .Child("Users")
                 .Child(safeEmail)

@@ -32,7 +32,6 @@
                 </CollectionView.ItemTemplate>
             </CollectionView>
 
-            <!-- 3. The Details Header (Matching image_81b5b7.png) -->
         </Grid>
     </VerticalStackLayout>
 </ContentPage>

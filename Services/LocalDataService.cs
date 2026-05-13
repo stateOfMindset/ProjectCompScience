@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO; // ADDED: Required for File and Stream operations!
+using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Text;
@@ -100,7 +100,7 @@ namespace ProjectCompScience.Services
             }
             catch (FirebaseAuthException)
             {
-                // We caught a Firebase error! Send a clean message back.
+               
                 return (false, "Incorrect email or password. Please try again.");
             }
             catch
@@ -274,7 +274,7 @@ namespace ProjectCompScience.Services
             }
             catch
             {
-                return 0; // If anything fails, assume they own 0 shares to be safe.
+                return 0; 
             }
         }
         #endregion

@@ -31,7 +31,7 @@
                 </Border.StrokeShape>
 
                 <VerticalStackLayout Spacing="15">
-                    <Label Text="CREATE ACCOUNT" FontSize="28" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" Margin="0,0,0,20"/>
+                    <Label Text="REGISTER" FontSize="28" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" Margin="0,0,0,20"/>
 
                     <VerticalStackLayout Spacing="5">
                         <Label Text="FULL NAME" TextColor="#A0A0A0" FontSize="11" />

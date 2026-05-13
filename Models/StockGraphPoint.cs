@@ -9,9 +9,6 @@ namespace ProjectCompScience.Models
 {
     public class StockGraphPoint
     {
-        public DateTime x { get; set; }
-        public float y {get; set; }
-
         public DateTime Timestamp { get; set; }
 
         [JsonPropertyName("1. open")]

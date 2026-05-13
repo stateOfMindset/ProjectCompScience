@@ -18,7 +18,6 @@ public partial class Login : ContentPage
     {
         base.OnAppearing();
 
-        // Now the UI draws instantly and ENV loads in the background
         await LocalDataService.GetLocalDataService().InitAsync();
     }
 }

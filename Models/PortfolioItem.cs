@@ -10,6 +10,8 @@ namespace ProjectCompScience.Models
     {
         public string Ticker { get; set; }
         public string CompanyName { get; set; }
+
+        public StockSymbol StockSymbol { get; set; }
         public double TotalShares { get; set; }
         public double AveragePurchasePrice { get; set; }
     }

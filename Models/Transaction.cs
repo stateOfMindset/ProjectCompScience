@@ -9,6 +9,7 @@ namespace ProjectCompScience.Models
     internal class Transaction
     {
         public string Id { get; set; }
+        public StockSymbol stockSymbol {get; set;}
         public string Ticker { get; set; }
         public string CompanyName { get; set; }
         public string TransactionType { get; set; } // "BUY" or "SELL"

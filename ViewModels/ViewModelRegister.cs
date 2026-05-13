@@ -18,8 +18,6 @@ namespace ProjectCompScience.ViewModels
         private string errorLabelEmailField;
         private string errorLabelPasswordField;
         private bool isVisiblePasswordField = true;
-
-        // --- THE LOCK FIELD ---
         private bool isBusy;
         #endregion
 
@@ -66,7 +64,6 @@ namespace ProjectCompScience.ViewModels
             set { errorLabelPasswordField = value; OnPropertyChanged(); }
         }
 
-        // --- THE LOCK PROPERTY ---
         public bool IsBusy
         {
             get => isBusy;
@@ -107,7 +104,7 @@ namespace ProjectCompScience.ViewModels
         private void ValidatePassword()
         {
             if (string.IsNullOrWhiteSpace(PasswordInput1)) ErrorLabelPasswordField = "Password is required";
-            else if (PasswordInput1.Length < 6) ErrorLabelPasswordField = "Minimum 6 characters"; // Firebase requires 6!
+            else if (PasswordInput1.Length < 6) ErrorLabelPasswordField = "Minimum 6 characters"; 
             else ErrorLabelPasswordField = "";
         }
         #endregion
@@ -115,12 +112,11 @@ namespace ProjectCompScience.ViewModels
         #region Registration Logic
         private async Task Register()
         {
-            //  Force validations to run just in case the user clicked Register on an empty screen
+    
             ValidateName();
             ValidateEmail();
             ValidatePassword();
 
-            //  Check if any errors popped up from the validations
             if (!string.IsNullOrEmpty(ErrorLabelNameText) ||
                 !string.IsNullOrEmpty(ErrorLabelEmailField) ||
                 !string.IsNullOrEmpty(ErrorLabelPasswordField))

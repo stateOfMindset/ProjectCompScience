@@ -106,7 +106,7 @@ namespace ProjectCompScience.ViewModels
 
             StockShares.Remove(itemToSell);
 
-            // 4. SHOW THE REAL RECEIPT
+            //  SHOW THE REAL RECEIPT
             await App.Current.MainPage.DisplayAlert("Trade Executed!",
                 $"Stock: {itemToSell.Ticker}\n" +
                 $"Shares Sold: {itemToSell.TotalShares}\n" +

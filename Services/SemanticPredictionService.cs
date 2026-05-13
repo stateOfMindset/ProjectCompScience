@@ -1,5 +1,5 @@
 ﻿using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.Connectors.Google; // Required for the Gemini connection
+using Microsoft.SemanticKernel.Connectors.Google; 
 using System;
 using System.Collections.Generic;
 using System.Linq;

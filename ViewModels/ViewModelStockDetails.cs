@@ -94,7 +94,6 @@ namespace ProjectCompScience.ViewModels
         public ICommand PredictFutureCommand { get; }
         public ICommand BuyStockCommand { get; }
 
-        // ADDED: The Sell Command!
         public ICommand SellStockCommand { get; }
         #endregion
 
@@ -104,8 +103,6 @@ namespace ProjectCompScience.ViewModels
             ChangeTimeRangeCommand = new Command<string>(UpdateGraphRange);
             PredictFutureCommand = new Command(async () => await GeneratePredictionAsync());
             BuyStockCommand = new Command(async () => await ExecuteBuyStockAsync());
-
-            // ADDED: Instantiate the command
             SellStockCommand = new Command(async () => await ExecuteSellStockAsync());
         }
         #endregion
@@ -290,7 +287,7 @@ namespace ProjectCompScience.ViewModels
             }
         }
 
-        // ADDED: The Sell Logic!
+ 
         private async Task ExecuteSellStockAsync()
         {
             if (string.IsNullOrEmpty(CurrentPrice)) return;
