@@ -18,11 +18,8 @@ namespace ProjectCompScience.Services
 
         // 2. Client for the Firebase
         private readonly FirebaseClient _firebase;
-        
 
         public GraphPlotter _plotter = new GraphPlotter();
-        public int xMin { get; set; }
-        public int xMax { get; set; }
         public bool isZoom = false;
         public List<StockGraphPoint> stocksValues { get; set; } = new();
 
@@ -30,7 +27,6 @@ namespace ProjectCompScience.Services
         private static api_services? instance;
         static public api_services GetStockAPIService()
         {
-
             if (instance == null)
             {
                 instance = new api_services();
@@ -44,12 +40,14 @@ namespace ProjectCompScience.Services
         {
             try
             {
-               
                 string envPath = LocalDataService.EnvFilePath;
                 if (File.Exists(envPath))
                 {
                     DotNetEnv.Env.Load(envPath);
                 }
+
+                string firebaseUrl = Environment.GetEnvironmentVariable("url_firebase") ?? null;
+                _firebase = new FirebaseClient(firebaseUrl);
             }
             catch (Exception ex)
             {
@@ -62,8 +60,8 @@ namespace ProjectCompScience.Services
         public async Task<List<StockGraphPoint>> FetchStockListAsync(string symbol)
         {
             string api_key = Environment.GetEnvironmentVariable("API_KEY_stocks") ?? "demo";
+            // api_key = "";
             string domain = Environment.GetEnvironmentVariable("API_SITE_stocks") ?? string.Empty;
-
 
             if (string.IsNullOrEmpty(domain))
                 domain = "https://www.alphavantage.co/query";
@@ -97,23 +95,21 @@ namespace ProjectCompScience.Services
 
         #region Firebase Economy Methods
 
-        private string SanitizeEmail(string email) => email.Replace(".", "_");
-
-        // GET BALANCE
-        public async Task<double> GetUserBalanceAsync(string userEmail)
+        // GET BALANCE (Updated to use userId and exact JSON structure)
+        public async Task<double> GetUserBalanceAsync(string userId)
         {
             try
             {
-                string safeEmail = SanitizeEmail(userEmail);
                 var balance = await _firebase
-                    .Child("Users")
-                    .Child(safeEmail)
+                    .Child("users")
+                    .Child(userId)
+                    .Child("Details") // Balance is inside Details according to your JSON
                     .Child("Balance")
                     .OnceSingleAsync<double>();
 
                 if (balance == 0)
                 {
-                    await UpdateUserBalanceAsync(userEmail, 10000.00);
+                    await UpdateUserBalanceAsync(userId, 10000.00);
                     return 10000.00;
                 }
                 return balance;
@@ -125,38 +121,67 @@ namespace ProjectCompScience.Services
         }
 
         // UPDATE BALANCE
-        public async Task UpdateUserBalanceAsync(string userEmail, double newBalance)
+        public async Task UpdateUserBalanceAsync(string userId, double newBalance)
         {
-            string safeEmail = SanitizeEmail(userEmail);
             await _firebase
-                .Child("Users")
-                .Child(safeEmail)
+                .Child("users")
+                .Child(userId)
+                .Child("Details")
                 .Child("Balance")
                 .PutAsync(newBalance);
         }
 
-        public async Task RecordTransactionAsync(string userEmail, Transaction transaction)
+        // RECORD TRANSACTION
+        public async Task RecordTransactionAsync(string userId, Transaction transaction)
         {
-            string safeEmail = SanitizeEmail(userEmail);
             await _firebase
-                .Child("Users")
-                .Child(safeEmail)
+                .Child("users")
+                .Child(userId)
                 .Child("Transactions")
                 .PostAsync(transaction);
         }
 
         // UPDATE PORTFOLIO SHARES
-        public async Task UpdatePortfolioAsync(string userEmail, PortfolioItem item)
+        public async Task UpdatePortfolioAsync(string userId, PortfolioItem item)
         {
-            string safeEmail = SanitizeEmail(userEmail);
-
-   
             await _firebase
-                .Child("Users")
-                .Child(safeEmail)
+                .Child("users")
+                .Child(userId)
                 .Child("Portfolio")
                 .Child(item.Ticker)
                 .PutAsync(item);
+        }
+
+        // GET ENTIRE PORTFOLIO
+        public async Task<List<PortfolioItem>> GetPortfolioAsync(string userId)
+        {
+            try
+            {
+                // Fetch all items under the user's Portfolio node using exact ID
+                var portfolioRecords = await _firebase
+                    .Child("users")
+                    .Child(userId)
+                    .Child("Portfolio")
+                    .OnceAsync<PortfolioItem>();
+
+                var portfolioList = new List<PortfolioItem>();
+
+                foreach (var record in portfolioRecords)
+                {
+                    // We only want to add it to the pie chart if they actually own shares (> 0)
+                    if (record.Object != null && record.Object.TotalShares > 0)
+                    {
+                        portfolioList.Add(record.Object);
+                    }
+                }
+
+                return portfolioList;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching portfolio: {ex.Message}");
+                return new List<PortfolioItem>();
+            }
         }
         #endregion
     }

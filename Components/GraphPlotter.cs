@@ -15,6 +15,8 @@ namespace ProjectCompScience.Components
 {
     class GraphPlotter : IDrawable
     {
+        public List<StockGraphPoint> ComparePoints1 { get; set; }
+        public List<StockGraphPoint> ComparePoints2 { get; set; }
         public List<StockGraphPoint> StockPoints { get; set; } = new List<StockGraphPoint>();
         public List<StockGraphPoint> PredictionData { get; set; } = new List<StockGraphPoint>();
         public List<PointMine> Points { get; set; } = new();
@@ -38,7 +40,6 @@ namespace ProjectCompScience.Components
 
             if (StockPoints == null || !StockPoints.Any()) return;
 
-            // 1. CREATE A MASTER LIST FOR SCALING
             // We need the grid to be big enough to fit both history AND the future prediction
             var allPoints = new List<StockGraphPoint>(StockPoints);
             if (PredictionData != null && PredictionData.Any())
@@ -71,7 +72,7 @@ namespace ProjectCompScience.Components
             if (PredictionData != null && PredictionData.Any())
             {
                 canvas.StrokeColor = Colors.MediumPurple;
-                canvas.StrokeDashPattern = new float[] { 5, 5 }; // The magic dotted line array!
+                canvas.StrokeDashPattern = new float[] { 5, 5 };
 
                 // To make the purple line seamlessly connect to the green line, 
                 // we prepend the very last history point to the prediction drawing list.
@@ -80,11 +81,29 @@ namespace ProjectCompScience.Components
 
                 drawLineSeries(canvas, dirtyRect, connectionList, globalMinX, globalMaxX, p => float.Parse(p.Open));
             }
+
+            // 4. DRAW COMPARISON STOCK 1 (Solid Cyan)
+            if (ComparePoints1 != null && ComparePoints1.Any())
+            {
+                canvas.StrokeDashPattern = null; // Ensure it's a solid line
+                drawLineSeries(canvas, dirtyRect, ComparePoints1, globalMinX, globalMaxX, p => float.Parse(p.Open), Colors.Cyan);
+            }
+
+            // 5. DRAW COMPARISON STOCK 2 (Solid Gold)
+            if (ComparePoints2 != null && ComparePoints2.Any())
+            {
+                canvas.StrokeDashPattern = null; // Ensure it's a solid line
+                drawLineSeries(canvas, dirtyRect, ComparePoints2, globalMinX, globalMaxX, p => float.Parse(p.Open), Colors.Gold);
+            }
         }
 
-        // Updated to accept specific data to draw, and the global X bounds
-        public void drawLineSeries(ICanvas canvas, RectF dirtyRect, List<StockGraphPoint> dataToDraw, long globalMinX, long globalMaxX, Func<StockGraphPoint, float> priceSelector)
+        public void drawLineSeries(ICanvas canvas, RectF dirtyRect, List<StockGraphPoint> dataToDraw, long globalMinX, long globalMaxX, Func<StockGraphPoint, float> priceSelector, Microsoft.Maui.Graphics.Color customColor = null)
         {
+            if (customColor != null)
+            {
+                canvas.StrokeColor = customColor;
+            }
+
             List<PointMine> Points = new List<PointMine>();
 
             foreach (var p in dataToDraw)
@@ -99,7 +118,7 @@ namespace ProjectCompScience.Components
 
             canvas.StrokeSize = 2;
 
-            // XRange is now based on the GLOBAL timeline, not just this specific line segment
+
             long XRange = globalMaxX - globalMinX;
             float YRange = prettyMax - prettyMin;
 
@@ -113,7 +132,7 @@ namespace ProjectCompScience.Components
 
             foreach (var p in Points)
             {
-                // Calculate percentage based on the GLOBAL minX
+
                 float xPercent = ((float)(p.x - globalMinX)) / XRange;
                 float yPercent = (prettyMax - p.y) / YRange;
 
@@ -162,7 +181,6 @@ namespace ProjectCompScience.Components
             canvas.DrawLine(_padding, dirtyRect.Height - _padding, dirtyRect.Width - _padding, dirtyRect.Height - _padding);
         }
 
-        // Updated to accept the master list of points so future dates are calculated
         private void DrawLabels(ICanvas canvas, RectF dirtyRect, float minPrice, float maxPrice, List<StockGraphPoint> allPoints)
         {
             if (allPoints == null || !allPoints.Any()) return;

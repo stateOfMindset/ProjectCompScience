@@ -8,10 +8,12 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using ProjectCompScience.View;
+using Microsoft.Maui.Controls; // חשוב בשביל הניווט של Shell
 
 namespace ProjectCompScience.ViewModels
 {
-    internal class ViewModelBuyShares : ViewModelBase
+    // הוספנו את IQueryAttributable כדי שנוכל לקבל פרמטרים מבחוץ
+    internal class ViewModelBuyShares : ViewModelBase, IQueryAttributable
     {
         #region Fields
         private List<StockSymbol> _allStocks = new List<StockSymbol>();
@@ -20,6 +22,9 @@ namespace ProjectCompScience.ViewModels
         #endregion
 
         #region Properties
+        // דגל חדש שאומר לנו אם אנחנו במצב "הוספת מניה להשוואה"
+        public bool IsComparing { get; set; } = false;
+
         public ObservableCollection<StockSymbol> FilteredStocks
         {
             get => _filteredStocks;
@@ -60,6 +65,20 @@ namespace ProjectCompScience.ViewModels
         }
         #endregion
 
+        #region Navigation Arguments
+        // הפונקציה הזו תופסת את הדגל שמגיע מעמוד הגרף
+        public void ApplyQueryAttributes(IDictionary<string, object> query)
+        {
+            Console.WriteLine($"[DEBUG] ApplyQueryAttributes hit. FilteredStocks count is: {FilteredStocks?.Count}");
+            if (query.ContainsKey("IsComparing"))
+            {
+                IsComparing = bool.Parse(query["IsComparing"].ToString());
+                // מנקים את זה כדי שלא נישאר במצב השוואה לנצח
+                query.Remove("IsComparing");
+            }
+        }
+        #endregion
+
         #region Logic Methods
         private void SearchStocks(string query)
         {
@@ -81,12 +100,22 @@ namespace ProjectCompScience.ViewModels
         {
             if (stock == null) return;
 
-            SelectedStock = stock;
+            if (IsComparing)
+            {
+                var navParams = new Dictionary<string, object> { { "compareTicker", stock.Ticker } };
+                await Shell.Current.GoToAsync("..", navParams);
+                IsComparing = false;
+            }
+            else
+            {
+                await Shell.Current.GoToAsync($"{nameof(StockDetails)}?ticker={stock.Ticker}&name={stock.Title}");
+            }
 
-           
-            await Shell.Current.GoToAsync($"{nameof(StockDetails)}?ticker={stock.Ticker}&name={stock.Title}");
-
-            FilteredStocks.Clear();
+            MainThread.BeginInvokeOnMainThread(async () =>
+            {
+                await Task.Delay(100);
+                SelectedStock = null;
+            });
         }
 
         private void SaveDataSilently()

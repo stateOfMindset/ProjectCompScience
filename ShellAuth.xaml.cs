@@ -11,6 +11,7 @@ namespace ProjectCompScience
 
             Routing.RegisterRoute(nameof(StockDetails), typeof(StockDetails));
             Routing.RegisterRoute(nameof(TransactionDetailsViewl), typeof(TransactionDetailsViewl));
+            //Routing.RegisterRoute("CompareSearch", typeof(BuyShares));
         }
 
         private async void MenuItem_Logout_Clicked(object sender, EventArgs e)
