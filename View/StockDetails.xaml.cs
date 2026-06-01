@@ -1,6 +1,9 @@
-using ProjectCompScience.ViewModels;
-
 namespace ProjectCompScience.View;
+
+using ProjectCompScience.ViewModels;
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.ApplicationModel;
+using System;
 
 public partial class StockDetails : ContentPage
 {
@@ -8,14 +11,38 @@ public partial class StockDetails : ContentPage
     {
         InitializeComponent();
 
+ 
         var viewModel = new StockDetailsViewModel();
         BindingContext = viewModel;
 
-        viewModel.OnGraphDataChanged += ForceGraphRedraw;
     }
 
-    private void ForceGraphRedraw()
+    protected override void OnBindingContextChanged()
     {
-        StockGraphView.Invalidate();
+        base.OnBindingContextChanged();
+
+        if (BindingContext is StockDetailsViewModel vm)
+        {
+            if (StockGraphView != null)
+            {
+                StockGraphView.Drawable = vm.MyGraphDrawable;
+            }
+
+            vm.OnGraphDataChanged -= TriggerGraphRedraw;
+
+            vm.OnGraphDataChanged += TriggerGraphRedraw;
+        }
+    }
+
+    // 4. הפונקציה שמציירת בפועל
+    private void TriggerGraphRedraw()
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            if (StockGraphView != null)
+            {
+                StockGraphView.Invalidate();
+            }
+        });
     }
 }

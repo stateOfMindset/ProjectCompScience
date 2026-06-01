@@ -9,6 +9,7 @@ namespace ProjectCompScience
             try
             {
                 InitializeComponent();
+                //Connectivity.Current.ConnectivityChanged += OnConnectivityChanged;
                 MainPage = new ShellNotAuth();
             }
             catch (Exception ex)

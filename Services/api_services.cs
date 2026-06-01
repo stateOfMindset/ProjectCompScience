@@ -40,11 +40,11 @@ namespace ProjectCompScience.Services
         {
             try
             {
-                string envPath = LocalDataService.EnvFilePath;
-                if (File.Exists(envPath))
-                {
-                    DotNetEnv.Env.Load(envPath);
-                }
+                //string envPath = LocalDataService.EnvFilePath;
+                //if (File.Exists(envPath))
+                //{
+                //    DotNetEnv.Env.Load(envPath);
+                //}
 
                 string firebaseUrl = Environment.GetEnvironmentVariable("url_firebase") ?? null;
                 _firebase = new FirebaseClient(firebaseUrl);
@@ -60,11 +60,8 @@ namespace ProjectCompScience.Services
         public async Task<List<StockGraphPoint>> FetchStockListAsync(string symbol)
         {
             string api_key = Environment.GetEnvironmentVariable("API_KEY_stocks") ?? "demo";
-            // api_key = "";
-            string domain = Environment.GetEnvironmentVariable("API_SITE_stocks") ?? string.Empty;
 
-            if (string.IsNullOrEmpty(domain))
-                domain = "https://www.alphavantage.co/query";
+            string domain = "https://www.alphavantage.co/query";
 
             string url = $"{domain}?function=TIME_SERIES_DAILY&symbol={symbol}&apikey={api_key}&outputsize=compact";
 

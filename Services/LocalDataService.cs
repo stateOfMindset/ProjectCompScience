@@ -43,16 +43,20 @@ namespace ProjectCompScience.Services
 
         public async Task InitAsync()
         {
-            // Remove the Task.Run().Wait() wrapper! Just await it normally.
-            if (!File.Exists(EnvFilePath))
-            {
-                using Stream fileStream = await FileSystem.Current.OpenAppPackageFileAsync("firebase.env");
-                using FileStream writeStream = File.OpenWrite(EnvFilePath);
-                await fileStream.CopyToAsync(writeStream);
-            }
+            var assembly = typeof(App).Assembly;
+            string resourceName = "ProjectCompScience.Resources.Raw.firebase.env";
 
-            // Load the environment variables
-            DotNetEnv.Env.Load(EnvFilePath);
+            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+            {
+                if (stream != null)
+                {
+                    DotNetEnv.Env.Load(stream);
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("CRITICAL ERROR: Embedded .env file not found!");
+                }
+            }
 
             // Connect to Firebase
             var config = new FirebaseAuthConfig()

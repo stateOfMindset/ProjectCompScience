@@ -363,3 +363,5 @@ MigrationBackup/
 FodyWeavers.xsd
 /Data/.env
 /Data/test_json/data.json
+/Resources/Raw/firebase.env
+/Resources/Raw/firebase.env

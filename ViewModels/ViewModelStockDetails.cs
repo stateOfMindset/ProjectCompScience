@@ -27,6 +27,8 @@ namespace ProjectCompScience.ViewModels
         private string _percentageChange;
         private Color _trendColor;
         private List<StockGraphPoint> _allFetchedPoints = new();
+        private List<StockGraphPoint> _allCompare1Points = new();
+        private List<StockGraphPoint> _allCompare2Points = new();
         private string _currentTimeRange = "1M";
         #endregion
 
@@ -124,8 +126,9 @@ namespace ProjectCompScience.ViewModels
             SellStockCommand = new Command(async () => await ExecuteSellStockAsync());
             AddCompareCommand = new Command(async () => await ExecuteAddCompareAsync());
 
-            RemoveCompare1Command = new Command(() => { IsCompare1Visible = false; api_services.GetStockAPIService()._plotter.ComparePoints1 = null; OnGraphDataChanged?.Invoke(); });
-            RemoveCompare2Command = new Command(() => { IsCompare2Visible = false; api_services.GetStockAPIService()._plotter.ComparePoints2 = null; OnGraphDataChanged?.Invoke(); });
+            RemoveCompare1Command = new Command(() => { IsCompare1Visible = false; _allCompare1Points.Clear(); api_services.GetStockAPIService()._plotter.ComparePoints1 = null; OnGraphDataChanged?.Invoke(); });
+            RemoveCompare2Command = new Command(() => { IsCompare2Visible = false; _allCompare2Points.Clear(); api_services.GetStockAPIService()._plotter.ComparePoints2 = null; OnGraphDataChanged?.Invoke(); });
+
         }
         #endregion
 
@@ -139,7 +142,7 @@ namespace ProjectCompScience.ViewModels
             }
 
             // Navigate to the Search Page in "Compare Mode"
-            await Shell.Current.GoToAsync("//BuyShares?IsComparing=true");
+            await Shell.Current.GoToAsync("CompareSearch?IsComparing=true");
         }
 
         private async Task LoadAndDrawComparisonStockAsync(string tickerInput)
@@ -180,6 +183,8 @@ namespace ProjectCompScience.ViewModels
                 Compare1Ticker = tickerInput;
                 Compare1Price = $"${lastPrice:F2}";
                 Compare1Change = $"{sign}{percentDiff:F2}%";
+
+                _allCompare1Points = rawData; 
                 apiService._plotter.ComparePoints1 = filtered;
                 IsCompare1Visible = true;
             }
@@ -188,6 +193,8 @@ namespace ProjectCompScience.ViewModels
                 Compare2Ticker = tickerInput;
                 Compare2Price = $"${lastPrice:F2}";
                 Compare2Change = $"{sign}{percentDiff:F2}%";
+
+                _allCompare2Points = rawData; 
                 apiService._plotter.ComparePoints2 = filtered;
                 IsCompare2Visible = true;
             }
@@ -219,6 +226,7 @@ namespace ProjectCompScience.ViewModels
                 _ => endDate.AddMonths(-1)
             };
 
+
             var filteredPoints = _allFetchedPoints
                 .Where(p => p.Timestamp >= startDate && p.Timestamp <= endDate)
                 .OrderBy(p => p.Timestamp)
@@ -240,6 +248,22 @@ namespace ProjectCompScience.ViewModels
             var apiService = api_services.GetStockAPIService();
             apiService.stocksValues = filteredPoints;
             apiService._plotter.StockPoints = filteredPoints;
+
+            if (IsCompare1Visible && _allCompare1Points != null && _allCompare1Points.Any())
+            {
+                apiService._plotter.ComparePoints1 = _allCompare1Points
+                    .Where(p => p.Timestamp >= startDate && p.Timestamp <= endDate)
+                    .OrderBy(p => p.Timestamp)
+                    .ToList();
+            }
+
+            if (IsCompare2Visible && _allCompare2Points != null && _allCompare2Points.Any())
+            {
+                apiService._plotter.ComparePoints2 = _allCompare2Points
+                    .Where(p => p.Timestamp >= startDate && p.Timestamp <= endDate)
+                    .OrderBy(p => p.Timestamp)
+                    .ToList();
+            }
 
             if (apiService._plotter.PredictionData != null)
             {

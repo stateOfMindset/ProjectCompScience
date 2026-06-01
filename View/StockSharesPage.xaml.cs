@@ -20,17 +20,14 @@ public partial class StockSharesPage : ContentPage
             PortfolioPieChartView.Drawable = vm.MyPieChart;
         }
 
-        // האזנה לאזעקה וציור מחדש של הקנבס
         vm.OnPortfolioDataChanged += () =>
         {
             MainThread.BeginInvokeOnMainThread(() =>
             {
                 if (PortfolioPieChartView != null)
                 {
-                    // התיקון הקריטי: מעדכנים את החיבור לאובייקט החדש שנוצר ב-ViewModel!
                     PortfolioPieChartView.Drawable = vm.MyPieChart;
 
-                    // עכשיו מציירים!
                     PortfolioPieChartView.Invalidate();
                 }
             });

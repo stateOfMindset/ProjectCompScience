@@ -40,59 +40,62 @@ namespace ProjectCompScience.Components
 
             if (StockPoints == null || !StockPoints.Any()) return;
 
-            // We need the grid to be big enough to fit both history AND the future prediction
-            var allPoints = new List<StockGraphPoint>(StockPoints);
+            // 1. התיקון הגדול: אוספים את כל המניות מכל הסוגים כדי לחשב זום נכון!
+            var allPointsForScale = new List<StockGraphPoint>(StockPoints);
+
             if (PredictionData != null && PredictionData.Any())
-            {
-                allPoints.AddRange(PredictionData);
-            }
+                allPointsForScale.AddRange(PredictionData);
+
+            if (ComparePoints1 != null && ComparePoints1.Any())
+                allPointsForScale.AddRange(ComparePoints1);
+
+            if (ComparePoints2 != null && ComparePoints2.Any())
+                allPointsForScale.AddRange(ComparePoints2);
 
             xmin = xmin + _padding;
             Xmax = Xmax - _padding;
 
-            // Calculate min/max prices using ALL points
-            float minP = allPoints.Min(p => float.Parse(p.Low ?? p.Open));
-            float maxP = allPoints.Max(p => float.Parse(p.High ?? p.Open));
+            // 2. עכשיו הרצפה והתקרה מחושבים לפי המניה הכי יקרה והכי זולה במסך
+            float minP = allPointsForScale.Min(p => float.Parse(p.Low ?? p.Open));
+            float maxP = allPointsForScale.Max(p => float.Parse(p.High ?? p.Open));
+
             prettyMax = MathF.Ceiling(maxP / 9) * 10;
             prettyMin = MathF.Ceiling(minP - minP / 10);
 
-            // Calculate absolute start and end dates
-            long globalMinX = allPoints.Min(p => p.Timestamp.Ticks / 86400);
-            long globalMaxX = allPoints.Max(p => p.Timestamp.Ticks / 86400);
+            long globalMinX = allPointsForScale.Min(p => p.Timestamp.Ticks / 86400);
+            long globalMaxX = allPointsForScale.Max(p => p.Timestamp.Ticks / 86400);
 
-            // Pass the master list to labels so future dates render on the X-Axis
-            DrawLabels(canvas, dirtyRect, minP, prettyMax, allPoints);
+            // 3. מציירים את התוויות (מעבירים רק את מניית הבסיס כדי שהתאריכים למטה לא ישתגעו)
+            DrawLabels(canvas, dirtyRect, minP, prettyMax, StockPoints);
 
-            // 2. DRAW HISTORY (Solid Lime)
+            // 4. DRAW HISTORY (Solid Lime)
             canvas.StrokeColor = Microsoft.Maui.Graphics.Color.FromArgb("#FF2ECC71");
             canvas.StrokeDashPattern = null;
             drawLineSeries(canvas, dirtyRect, StockPoints, globalMinX, globalMaxX, p => float.Parse(p.Open));
 
-            // 3. DRAW PREDICTION (Dotted Purple)
+            // 5. DRAW PREDICTION (Dotted Purple)
             if (PredictionData != null && PredictionData.Any())
             {
                 canvas.StrokeColor = Colors.MediumPurple;
                 canvas.StrokeDashPattern = new float[] { 5, 5 };
 
-                // To make the purple line seamlessly connect to the green line, 
-                // we prepend the very last history point to the prediction drawing list.
                 var connectionList = new List<StockGraphPoint> { StockPoints.Last() };
                 connectionList.AddRange(PredictionData);
 
                 drawLineSeries(canvas, dirtyRect, connectionList, globalMinX, globalMaxX, p => float.Parse(p.Open));
             }
 
-            // 4. DRAW COMPARISON STOCK 1 (Solid Cyan)
+            // 6. DRAW COMPARISON STOCK 1 (Solid Cyan)
             if (ComparePoints1 != null && ComparePoints1.Any())
             {
-                canvas.StrokeDashPattern = null; // Ensure it's a solid line
+                canvas.StrokeDashPattern = null;
                 drawLineSeries(canvas, dirtyRect, ComparePoints1, globalMinX, globalMaxX, p => float.Parse(p.Open), Colors.Cyan);
             }
 
-            // 5. DRAW COMPARISON STOCK 2 (Solid Gold)
+            // 7. DRAW COMPARISON STOCK 2 (Solid Gold)
             if (ComparePoints2 != null && ComparePoints2.Any())
             {
-                canvas.StrokeDashPattern = null; // Ensure it's a solid line
+                canvas.StrokeDashPattern = null;
                 drawLineSeries(canvas, dirtyRect, ComparePoints2, globalMinX, globalMaxX, p => float.Parse(p.Open), Colors.Gold);
             }
         }
@@ -104,20 +107,18 @@ namespace ProjectCompScience.Components
                 canvas.StrokeColor = customColor;
             }
 
-            List<PointMine> Points = new List<PointMine>();
+            List<PointMine> localPoints = new List<PointMine>();
 
             foreach (var p in dataToDraw)
             {
-                long px = p.Timestamp.Ticks / 86400; //86400 - seconds per day
+                long px = p.Timestamp.Ticks / 86400;
                 float py = priceSelector(p);
-
-                Points.Add(new PointMine { x = px, y = py });
+                localPoints.Add(new PointMine { x = px, y = py });
             }
 
-            if (Points == null || Points.Count < 2) return;
+            if (localPoints.Count < 2) return;
 
             canvas.StrokeSize = 2;
-
 
             long XRange = globalMaxX - globalMinX;
             float YRange = prettyMax - prettyMin;
@@ -130,9 +131,8 @@ namespace ProjectCompScience.Components
 
             List<PointF> screenPoints = new();
 
-            foreach (var p in Points)
+            foreach (var p in localPoints)
             {
-
                 float xPercent = ((float)(p.x - globalMinX)) / XRange;
                 float yPercent = (prettyMax - p.y) / YRange;
 
@@ -145,7 +145,6 @@ namespace ProjectCompScience.Components
             {
                 var p1 = screenPoints[i];
                 var p2 = screenPoints[i + 1];
-
                 canvas.DrawLine(p1.X, p1.Y, p2.X, p2.Y);
             }
         }
@@ -181,9 +180,9 @@ namespace ProjectCompScience.Components
             canvas.DrawLine(_padding, dirtyRect.Height - _padding, dirtyRect.Width - _padding, dirtyRect.Height - _padding);
         }
 
-        private void DrawLabels(ICanvas canvas, RectF dirtyRect, float minPrice, float maxPrice, List<StockGraphPoint> allPoints)
+        private void DrawLabels(ICanvas canvas, RectF dirtyRect, float minPrice, float maxPrice, List<StockGraphPoint> pointsForDates)
         {
-            if (allPoints == null || !allPoints.Any()) return;
+            if (pointsForDates == null || !pointsForDates.Any()) return;
 
             float usableWidth = dirtyRect.Width - (2 * _padding);
             float usableHeight = dirtyRect.Height - (2 * _padding);
@@ -199,31 +198,22 @@ namespace ProjectCompScience.Components
 
                 canvas.DrawString(
                     $"{FormatPrice(priceVal)}",
-                    0,
-                    y - 10,
-                    _padding - 5,
-                    20,
-                    HorizontalAlignment.Right,
-                    VerticalAlignment.Center);
+                    0, y - 10, _padding - 5, 20,
+                    HorizontalAlignment.Right, VerticalAlignment.Center);
             }
 
             int dateDivisions = 5;
             for (int i = 0; i <= dateDivisions; i++)
             {
-                // uses allPoints to grab the dates
-                int index = i * (allPoints.Count - 1) / dateDivisions;
-                var point = allPoints[index];
+                int index = i * (pointsForDates.Count - 1) / dateDivisions;
+                var point = pointsForDates[index];
 
                 float x = _padding + (i * (usableWidth / dateDivisions));
 
                 canvas.DrawString(
                     point.Timestamp.ToString("dd/MM"),
-                    x - 25,
-                    dirtyRect.Height - _padding + 5,
-                    50,
-                    20,
-                    HorizontalAlignment.Center,
-                    VerticalAlignment.Top);
+                    x - 25, dirtyRect.Height - _padding + 5, 50, 20,
+                    HorizontalAlignment.Center, VerticalAlignment.Top);
             }
         }
 

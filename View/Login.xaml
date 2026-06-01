@@ -15,58 +15,62 @@
             <BoxView Color="Lime" AbsoluteLayout.LayoutBounds="0,0.6,1,1" AbsoluteLayout.LayoutFlags="PositionProportional, WidthProportional"/>
         </AbsoluteLayout>
 
-        <ScrollView>
-            <Border MaximumWidthRequest="400" 
-                    MinimumWidthRequest="320"
-                    HorizontalOptions="Center" 
-                    VerticalOptions="Center"
-                    BackgroundColor="#222222"
-                    Stroke="#333333"
-                    StrokeThickness="1"
-                    Padding="40"
-                    Margin="20,50">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="12" />
-                </Border.StrokeShape>
+        <ScrollView x:Name="MainScroll" VerticalOptions="Fill">
 
-                <VerticalStackLayout Spacing="20">
-                    <Label Text="LOG IN" FontSize="28" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" Margin="0,0,0,10"/>
+            <Grid MinimumHeightRequest="{Binding Height, Source={x:Reference MainScroll}}">
 
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="EMAIL" TextColor="#A0A0A0" FontSize="11" />
-                        <Border Style="{StaticResource InputContainer}">
-                            <Entry Text="{Binding EmailInput}" Style="{StaticResource ModernEntry}" Placeholder="Enter your email"/>
-                        </Border>
+                <Border MaximumWidthRequest="400" 
+                        MinimumWidthRequest="320"
+                        HorizontalOptions="Center" 
+                        VerticalOptions="Center"
+                        BackgroundColor="#222222"
+                        Stroke="#333333"
+                        StrokeThickness="1"
+                        Padding="40"
+                        Margin="20,20">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="12" />
+                    </Border.StrokeShape>
+
+                    <VerticalStackLayout Spacing="20">
+                        <Label Text="LOG IN" FontSize="28" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" Margin="0,0,0,10"/>
+
+                        <VerticalStackLayout Spacing="5">
+                            <Label Text="EMAIL" TextColor="#A0A0A0" FontSize="11" />
+                            <Border Style="{StaticResource InputContainer}">
+                                <Entry Text="{Binding EmailInput}" Style="{StaticResource ModernEntry}" Placeholder="Enter your email"/>
+                            </Border>
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Spacing="5">
+                            <Label Text="PASSWORD" TextColor="#A0A0A0" FontSize="11" />
+                            <Border Style="{StaticResource InputContainer}">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <Entry Grid.Column="0" 
+                                           Text="{Binding PasswordInput}" 
+                                           Style="{StaticResource ModernEntry}" 
+                                           IsPassword="True" 
+                                           Placeholder="••••••••" />
+
+                                    <Button Grid.Column="1" 
+                                            Command="{Binding ButtonShowPasswordCommand}" 
+                                            Text="VIEW" 
+                                            BackgroundColor="Transparent" 
+                                            TextColor="#A0A0A0" 
+                                            FontSize="10" 
+                                            BorderWidth="0" 
+                                            Padding="15,0" 
+                                            Margin="0"/>
+                                </Grid>
+                            </Border>
+                        </VerticalStackLayout>
+
+                        <Button Command="{Binding SubmitLoginCommand}" Text="LOGIN" Style="{StaticResource PrimaryButton}" Margin="0,15,0,0"/>
+
+                        <Button BackgroundColor="Transparent" TextColor="#4CAF50" Command="{Binding GoRegisterCommand}" Text="Don't have an account ? Register here"/>
                     </VerticalStackLayout>
-
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="PASSWORD" TextColor="#A0A0A0" FontSize="11" />
-                        <Border Style="{StaticResource InputContainer}">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <Entry Grid.Column="0" 
-                                       Text="{Binding PasswordInput}" 
-                                       Style="{StaticResource ModernEntry}" 
-                                       IsPassword="True" 
-                                       Placeholder="••••••••" />
-
-                                <Button Grid.Column="1" 
-                                        Command="{Binding ButtonShowPasswordCommand}" 
-                                        Text="VIEW" 
-                                        BackgroundColor="Transparent" 
-                                        TextColor="#A0A0A0" 
-                                        FontSize="10" 
-                                        BorderWidth="0" 
-                                        Padding="15,0" 
-                                        Margin="0"/>
-                            </Grid>
-                        </Border>
-                    </VerticalStackLayout>
-
-                    <Button Command="{Binding SubmitLoginCommand}" Text="LOGIN" Style="{StaticResource PrimaryButton}" Margin="0,15,0,0"/>
-
-                    <Button BackgroundColor="Transparent" TextColor="#4CAF50" Command="{Binding GoRegisterCommand}" Text="Don't have an account ? Register here"/>
-                </VerticalStackLayout>
-            </Border>
+                </Border>
+            </Grid>
         </ScrollView>
     </Grid>
 </ContentPage>

@@ -13,12 +13,10 @@ namespace ProjectCompScience.Services
 
         public SemanticPredictionService()
         {
-            string envPath = LocalDataService.EnvFilePath;
-            DotNetEnv.Env.Load(envPath);
             var builder = Kernel.CreateBuilder();
 
             builder.AddGoogleAIGeminiChatCompletion(
-                modelId: "gemini-3-flash-preview",
+                modelId: "gemini-3.5-flash", //gemini-3.5-flash //gemini-3-flash-preview
                 apiKey: Environment.GetEnvironmentVariable("API_KEY_gemini")
             );
 

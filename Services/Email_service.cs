@@ -14,11 +14,11 @@ namespace ProjectCompScience.Services
         public static async Task SendReceiptAsync(string userEmail, string subject, string body)
         {
 
-            string envPath = LocalDataService.EnvFilePath;
-            if (File.Exists(envPath))
-            {
-                DotNetEnv.Env.Load(envPath);
-            }
+            //string envPath = LocalDataService.EnvFilePath;
+            //if (File.Exists(envPath))
+            //{
+            //    DotNetEnv.Env.Load(envPath);
+            //}
 
             string BotEmail = Environment.GetEnvironmentVariable("BOT_EMAIL");
             string AppPassword = Environment.GetEnvironmentVariable("BOT_PASSWORD");
