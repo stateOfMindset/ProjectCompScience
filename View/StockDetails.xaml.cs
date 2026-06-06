@@ -34,7 +34,7 @@ public partial class StockDetails : ContentPage
         }
     }
 
-    // 4. הפונקציה שמציירת בפועל
+
     private void TriggerGraphRedraw()
     {
         MainThread.BeginInvokeOnMainThread(() =>
@@ -44,5 +44,31 @@ public partial class StockDetails : ContentPage
                 StockGraphView.Invalidate();
             }
         });
+    }
+    private void OnTimeFilterClicked(object sender, EventArgs e)
+    {
+        foreach (var child in TimeFiltersContainer.Children)
+        {
+            if (child is Button btn)
+            {
+                btn.BackgroundColor = Colors.Transparent;
+                btn.TextColor = Color.FromArgb("#A0A0A0");
+            }
+        }
+
+        var clickedButton = (Button)sender;
+        clickedButton.BackgroundColor = Colors.White;
+        clickedButton.TextColor = Colors.Black;
+
+        clickedButton.CornerRadius = 8;
+    }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        if (BindingContext is StockDetailsViewModel vm)
+        {
+            vm.ClearComparisons();
+        }
     }
 }

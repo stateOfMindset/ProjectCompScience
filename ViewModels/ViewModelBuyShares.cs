@@ -1,14 +1,15 @@
-﻿using ProjectCompScience.Models;
+﻿using Microsoft.Maui.Controls; // חשוב בשביל הניווט של Shell
+using ProjectCompScience.Models;
+using ProjectCompScience.View;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
-using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using ProjectCompScience.View;
-using Microsoft.Maui.Controls; // חשוב בשביל הניווט של Shell
+using ProjectCompScience.Services;
 
 namespace ProjectCompScience.ViewModels
 {
@@ -24,6 +25,7 @@ namespace ProjectCompScience.ViewModels
         #region Properties
         // דגל חדש שאומר לנו אם אנחנו במצב "הוספת מניה להשוואה"
         public bool IsComparing { get; set; } = false;
+        private Color _targetColor = Color.FromArgb("#2ECC71");
 
         public ObservableCollection<StockSymbol> FilteredStocks
         {
@@ -63,23 +65,57 @@ namespace ProjectCompScience.ViewModels
 
             _ = LoadEmbeddedStocksAsync();
         }
+
+
         #endregion
 
         #region Navigation Arguments
         // הפונקציה הזו תופסת את הדגל שמגיע מעמוד הגרף
         public void ApplyQueryAttributes(IDictionary<string, object> query)
         {
-            Console.WriteLine($"[DEBUG] ApplyQueryAttributes hit. FilteredStocks count is: {FilteredStocks?.Count}");
+            int currentIndex = 0;
+
             if (query.ContainsKey("IsComparing"))
             {
                 IsComparing = bool.Parse(query["IsComparing"].ToString());
-                // מנקים את זה כדי שלא נישאר במצב השוואה לנצח
                 query.Remove("IsComparing");
+            }
+
+            if (query.ContainsKey("compareIndex"))
+            {
+                currentIndex = int.Parse(query["compareIndex"].ToString());
+                query.Remove("compareIndex");
+            }
+
+            // מעדכנים את המשתנה הגלובלי לפי מצב ההשוואה
+            if (IsComparing && currentIndex == 1)
+            {
+                _targetColor = Colors.Cyan;
+            }
+            else if (IsComparing && currentIndex == 2)
+            {
+                _targetColor = Colors.Orange;
+            }
+            else
+            {
+                _targetColor = Color.FromArgb("#2ECC71");
+            }
+
+            // אם המניות כבר נטענו (הקריאה מהקובץ הסתיימה), נעדכן אותן עכשיו
+            if (_allStocks != null && _allStocks.Any())
+            {
+                foreach (var stock in _allStocks)
+                {
+                    stock.ThemeColor = _targetColor;
+                }
+
+                // מרעננים את ה-UI
+                FilteredStocks = new ObservableCollection<StockSymbol>(_allStocks);
             }
         }
         #endregion
 
-        #region Logic Methods
+            #region Logic Methods
         private void SearchStocks(string query)
         {
             if (string.IsNullOrWhiteSpace(query))
@@ -148,6 +184,13 @@ namespace ProjectCompScience.ViewModels
                 if (secData != null)
                 {
                     _allStocks = secData.Values.ToList();
+
+                    // צובעים לפי הצבע הנוכחי שנבחר (אם הניווט כבר הספיק לעדכן אותו - הוא יצבע בתכלת/כתום, ואם לא - בירוק)
+                    foreach (var stock in _allStocks)
+                    {
+                        stock.ThemeColor = _targetColor;
+                    }
+
                     FilteredStocks = new ObservableCollection<StockSymbol>(_allStocks);
                     Console.WriteLine($"Successfully loaded {_allStocks.Count} stocks from the SEC!");
                 }

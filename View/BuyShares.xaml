@@ -10,65 +10,67 @@
 
              Title="BuyShares">
 
-    <VerticalStackLayout>
+    <Grid RowDefinitions="Auto, *" Padding="20" RowSpacing="20">
+        <VerticalStackLayout Grid.Row="0" Spacing="15">
+            <Label Text="Search Markets" FontSize="28" FontAttributes="Bold" TextColor="White" />
 
-        <Grid RowDefinitions="Auto, Auto, *">
+            <Border BackgroundColor="#1A1A1A" Stroke="#2A2A2A" StrokeThickness="1" Padding="5,0">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="12" />
+                </Border.StrokeShape>
 
+                <SearchBar x:Name="StockSearch"
+                           Placeholder="Search company or ticker..."
+                           PlaceholderColor="#888888"
+                           TextColor="White"
+                           BackgroundColor="Transparent"
+                           SearchCommand="{Binding SearchStocksCommand}"
+                           SearchCommandParameter="{Binding Source={x:Reference StockSearch}, Path=Text}" />
+            </Border>
+        </VerticalStackLayout>
 
+        <CollectionView Grid.Row="1" 
+                        ItemsSource="{Binding FilteredStocks}"
+                        SelectionMode="Single"
+                        SelectionChangedCommand="{Binding SelectStockCommand}"
+                        SelectionChangedCommandParameter="{Binding SelectedItem, Source={RelativeSource Self}}">
 
-            <!-- 1. Search Bar -->
+            <CollectionView.EmptyView>
+                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Margin="0,40,0,0" Spacing="10">
+                    <Label Text="🔍" FontSize="40" HorizontalOptions="Center"/>
+                    <Label Text="Find your next investment" TextColor="#888888" FontSize="16" FontAttributes="Bold" HorizontalOptions="Center"/>
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
 
-            <SearchBar x:Name="StockSearch"
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:StockSymbol">
 
-               Placeholder="Search company..."
+                    <Border BackgroundColor="#1A1A1A" Stroke="Transparent" Padding="15" Margin="0,0,0,10">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="12"/>
+                        </Border.StrokeShape>
 
-               SearchCommand="{Binding SearchStocksCommand}"
+                        <Grid ColumnDefinitions="Auto, *">
+                            <Label Grid.Column="0" 
+                                   Text="{Binding Ticker}" 
+                                   FontAttributes="Bold" 
+                                   TextColor="{Binding ThemeColor}" 
+                                   FontSize="18" 
+                                   VerticalOptions="Center"
+                                   WidthRequest="75"/>
 
-               SearchCommandParameter="{Binding Source={x:Reference StockSearch}, Path=Text}" />
+                            <Label Grid.Column="1" 
+                                   Text="{Binding Title}" 
+                                   TextColor="#AAAAAA" 
+                                   FontSize="14" 
+                                   VerticalOptions="Center"
+                                   LineBreakMode="TailTruncation"/>
+                        </Grid>
+                    </Border>
 
-
-
-            <!-- 2. Search Results (Overlay/Dropdown style) -->
-
-            <CollectionView ItemsSource="{Binding FilteredStocks}"
-
-                    SelectionMode="Single"
-
-                    SelectionChangedCommand="{Binding SelectStockCommand}"
-
-                    SelectionChangedCommandParameter="{Binding SelectedItem, Source={RelativeSource Self}}"
-
-                    ZIndex="10"
-
-                    BackgroundColor="#333333"
-
-                    MaximumHeightRequest="200"
-
-                    Grid.Row="1">
-
-                <CollectionView.ItemTemplate>
-
-                    <DataTemplate x:DataType="models:StockSymbol">
-
-                        <HorizontalStackLayout Padding="10" Spacing="10">
-
-                            <Label Text="{Binding Ticker}" FontAttributes="Bold" TextColor="White"/>
-
-                            <Label Text="{Binding Title}" TextColor="Gray"/>
-
-                        </HorizontalStackLayout>
-
-                    </DataTemplate>
-
-                </CollectionView.ItemTemplate>
-
-            </CollectionView>
-
-
-
-        </Grid>
-
-    </VerticalStackLayout>
-
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
 </ContentPage> 
 

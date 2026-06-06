@@ -10,7 +10,7 @@ using Microsoft.Maui.Controls;
 using Microsoft.Maui.ApplicationModel;
 using ProjectCompScience.Models;
 using ProjectCompScience.Services;
-using ProjectCompScience.Components; // החיבור לקומפוננטת הציור!
+using ProjectCompScience.Components;
 
 namespace ProjectCompScience.ViewModels
 {
@@ -33,6 +33,13 @@ namespace ProjectCompScience.ViewModels
             set { _stockShares = value; OnPropertyChanged(); }
         }
 
+        private double _totalPortfolioValue;
+        public double TotalPortfolioValue
+        {
+            get => _totalPortfolioValue;
+            set { _totalPortfolioValue = value; OnPropertyChanged(); }
+        }
+
         public ICommand ButtonMovePageCommand { get; set; }
         public ICommand ButtonDeleteShareCommand { get; set; }
         public ICommand GoToDetailsCommand { get; set; }
@@ -41,18 +48,21 @@ namespace ProjectCompScience.ViewModels
         {
             StockShares = new ObservableCollection<PortfolioItem>();
 
-            ButtonMovePageCommand = new Command(async () => {
+            ButtonMovePageCommand = new Command(async () =>
+            {
                 await Shell.Current.GoToAsync("//BuyShares");
             });
 
-            GoToDetailsCommand = new Command<PortfolioItem>(async (item) => {
+            GoToDetailsCommand = new Command<PortfolioItem>(async (item) =>
+            {
                 if (item != null)
                 {
                     await Shell.Current.GoToAsync($"StockDetails?ticker={item.Ticker}&name={item.CompanyName}&fromPortfolio=true");
                 }
             });
 
-            ButtonDeleteShareCommand = new Command<PortfolioItem>(async (item) => {
+            ButtonDeleteShareCommand = new Command<PortfolioItem>(async (item) =>
+            {
                 if (item != null)
                 {
                     await SellShareAsync(item);
@@ -77,6 +87,7 @@ namespace ProjectCompScience.ViewModels
                 StockShares.Add(item);
                 calculatedNetWorth += item.TotalShares * item.AveragePurchasePrice;
             }
+            TotalPortfolioValue = calculatedNetWorth;
 
             // 2. בונים את חתיכות הפאי עם האחוזים!
             var chartColors = new[] { Colors.Cyan, Color.FromArgb("#9B59B6"), Colors.Gold, Color.FromArgb("#E74C3C"), Color.FromArgb("#2ECC71") };
@@ -112,56 +123,98 @@ namespace ProjectCompScience.ViewModels
 
         private async Task SellShareAsync(PortfolioItem itemToSell)
         {
-            bool confirm = await App.Current.MainPage.DisplayAlert(
+            // 1. שואלים את המשתמש כמה מניות למכור
+            string sharesInput = await App.Current.MainPage.DisplayPromptAsync(
                 "Sell Stock",
-                $"Are you sure you want to sell all {itemToSell.TotalShares} shares of {itemToSell.Ticker}?",
-                "Yes, Sell", "Cancel");
+                $"You own {itemToSell.TotalShares} shares.\nHow many do you want to sell?",
+                initialValue: itemToSell.TotalShares.ToString(),
+                keyboard: Microsoft.Maui.Keyboard.Numeric);
 
-            if (!confirm) return;
+            if (string.IsNullOrWhiteSpace(sharesInput) || !int.TryParse(sharesInput, out int sharesToSell) || sharesToSell <= 0)
+                return;
 
-            double livePrice = itemToSell.AveragePurchasePrice; // Fallback just in case
+            if (sharesToSell > itemToSell.TotalShares)
+            {
+                await App.Current.MainPage.DisplayAlert("Error", $"You only have {itemToSell.TotalShares} shares to sell.", "OK");
+                return;
+            }
+
+            // 2. משיגים מחיר עדכני
+            double livePrice = itemToSell.AveragePurchasePrice;
             try
             {
                 var apiService = api_services.GetStockAPIService();
                 var recentData = await apiService.FetchStockListAsync(itemToSell.Ticker);
-
                 if (recentData != null && recentData.Any())
                 {
                     livePrice = double.Parse(recentData.Last().Open ?? "0");
                 }
             }
-            catch
-            {
-                await App.Current.MainPage.DisplayAlert("Market Error", "Could not fetch the live market price. Check your connection.", "OK");
-                return;
-            }
+            catch { /* מתעלמים אם אין אינטרנט ומשתמשים במחיר הרכישה כגיבוי */ }
 
             string currentUserId = Preferences.Get("UserId", "");
             var db = LocalDataService.GetLocalDataService();
 
-            double refundAmount = itemToSell.TotalShares * livePrice;
-            double originalCost = itemToSell.TotalShares * itemToSell.AveragePurchasePrice;
-            double profitLoss = refundAmount - originalCost;
-
-            string profitLossText = profitLoss >= 0 ? $"📈 Profit: +${profitLoss:F2}" : $"📉 Loss: -${Math.Abs(profitLoss):F2}";
-
+            double totalRevenue = sharesToSell * livePrice;
             double currentBalance = await db.GetUserBalanceAsync(currentUserId);
-            await db.UpdateUserBalanceAsync(currentUserId, currentBalance + refundAmount);
 
-            await db.RemovePortfolioItemAsync(currentUserId, itemToSell.Ticker);
+            // 3. אישור סופי
+            bool confirm = await App.Current.MainPage.DisplayAlert("Confirm Sale",
+                $"Sell {sharesToSell} shares of {itemToSell.Ticker} for ${totalRevenue:F2}?\n\nNew Wallet Balance: ${(currentBalance + totalRevenue):F2}",
+                "CONFIRM SELL", "CANCEL");
 
-            StockShares.Remove(itemToSell);
+            if (!confirm) return;
 
-            // SHOW THE REAL RECEIPT
-            await App.Current.MainPage.DisplayAlert("Trade Executed!",
-                $"Stock: {itemToSell.Ticker}\n" +
-                $"Shares Sold: {itemToSell.TotalShares}\n" +
-                $"Sell Price: ${livePrice:F2}\n" +
-                $"Total Return: ${refundAmount:F2}\n\n" +
-                $"{profitLossText}\n\n" +
-                $"New Wallet Balance: ${(currentBalance + refundAmount):F2}", "AWESOME");
+            // 4. עדכון יתרה בארנק
+            double newBalance = currentBalance + totalRevenue;
+            await db.UpdateUserBalanceAsync(currentUserId, newBalance);
 
-            // קוראים שוב לטעינה כדי שהגרף יתעדכן וימחק את המניה שנמכרה!
+            // 5. שמירת הפעולה בהיסטוריית הטרנזקציות
+            string newTransactionId = Guid.NewGuid().ToString().Split('-')[0].ToUpper();
+            var transaction = new Transaction
+            {
+                Id = newTransactionId,
+                Ticker = itemToSell.Ticker,
+                CompanyName = itemToSell.CompanyName,
+                TransactionType = "SELL",
+                Shares = sharesToSell,
+                PricePerShare = livePrice,
+                TotalAmount = totalRevenue,
+                Date = DateTime.UtcNow
+            };
+            await db.RecordTransactionAsync(currentUserId, transaction);
+
+            // 6. ניהול מסד הנתונים: מחיקה מוחלטת או החסרה
+            if (sharesToSell == itemToSell.TotalShares)
+            {
+                await db.RemovePortfolioItemAsync(currentUserId, itemToSell.Ticker);
+                StockShares.Remove(itemToSell);
+            }
+            else
+            {
+                int remainingShares =  (int)itemToSell.TotalShares - sharesToSell;
+                var portfolioUpdate = new PortfolioItem
+                {
+                    Ticker = itemToSell.Ticker,
+                    CompanyName = itemToSell.CompanyName,
+                    TotalShares = remainingShares,
+                    AveragePurchasePrice = itemToSell.AveragePurchasePrice
+                };
+                await db.UpdatePortfolioAsync(currentUserId, portfolioUpdate);
+            }
+
+            // 7. קבלה למשתמש
+            string receiptMessage =
+                $"Transaction ID: #{newTransactionId}\n" +
+                $"Stock: {itemToSell.CompanyName} ({itemToSell.Ticker})\n" +
+                $"Shares Sold: {sharesToSell}\n" +
+                $"Price Per Share: ${livePrice:F2}\n" +
+                $"Total Revenue: ${totalRevenue:F2}\n\n" +
+                $"New Balance: ${newBalance:F2}";
+
+            await App.Current.MainPage.DisplayAlert("Sale Successful!", receiptMessage, "CLOSE");
+
+            // 8. רענון הגרף והרשימה
             await LoadDataAsync();
         }
     }

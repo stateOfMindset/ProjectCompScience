@@ -19,7 +19,8 @@
         </Grid>
 
         <Border Grid.Row="1" Stroke="#333" BackgroundColor="#252525" Padding="15" StrokeShape="RoundRectangle 8">
-            <Grid ColumnDefinitions="Auto, *" HorizontalOptions="Fill" VerticalOptions="Center">
+
+            <Grid ColumnDefinitions="Auto, *, Auto" HorizontalOptions="Fill" VerticalOptions="Center">
 
                 <GraphicsView x:Name="PortfolioPieChartView"
                               Grid.Column="0"
@@ -38,6 +39,13 @@
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>
                 </VerticalStackLayout>
+
+                <VerticalStackLayout Grid.Column="2" VerticalOptions="Center" HorizontalOptions="End" Spacing="5" Margin="10,0,0,0">
+                    <Label Text="TOTAL VALUE" TextColor="#888" FontSize="10" FontAttributes="Bold" HorizontalTextAlignment="End"/>
+
+                    <Label Text="{Binding TotalPortfolioValue, StringFormat='${0:N2}'}" TextColor="#4CAF50" FontSize="18" FontAttributes="Bold" HorizontalTextAlignment="End"/>
+                </VerticalStackLayout>
+
             </Grid>
         </Border>
 

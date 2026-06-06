@@ -12,6 +12,7 @@ namespace ProjectCompScience.Models
         [JsonPropertyName("ticker")]
         public string Ticker { get; set; }
         [JsonPropertyName("title")]
-        public string Title { get; set; }  
+        public string Title { get; set; }
+        public Color ThemeColor { get; set; }
     }
 }

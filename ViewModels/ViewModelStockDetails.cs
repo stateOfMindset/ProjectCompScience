@@ -133,6 +133,19 @@ namespace ProjectCompScience.ViewModels
         #endregion
 
         #region Logic
+
+        public void ClearComparisons()
+        {
+            if (IsCompare1Visible)
+            {
+                RemoveCompare1Command.Execute(null);
+            }
+
+            if (IsCompare2Visible)
+            {
+                RemoveCompare2Command.Execute(null);
+            }
+        }
         private async Task ExecuteAddCompareAsync()
         {
             if (IsCompare1Visible && IsCompare2Visible)
@@ -141,8 +154,11 @@ namespace ProjectCompScience.ViewModels
                 return;
             }
 
-            // Navigate to the Search Page in "Compare Mode"
-            await Shell.Current.GoToAsync("CompareSearch?IsComparing=true");
+            // בודקים אם אנחנו עומדים להוסיף את ההשוואה הראשונה (תכלת) או השנייה (כתום)
+            int compareIndex = !IsCompare1Visible ? 1 : 2;
+
+            // מעבירים את המידע הזה לעמוד החיפוש
+            await Shell.Current.GoToAsync($"CompareSearch?IsComparing=true&compareIndex={compareIndex}");
         }
 
         private async Task LoadAndDrawComparisonStockAsync(string tickerInput)
@@ -326,10 +342,10 @@ namespace ProjectCompScience.ViewModels
                 initialValue: "1",
                 keyboard: Microsoft.Maui.Keyboard.Numeric);
 
-            if (string.IsNullOrWhiteSpace(sharesInput) || !int.TryParse(sharesInput, out int shares) || shares <= 0)
+            if (string.IsNullOrWhiteSpace(sharesInput) || !int.TryParse(sharesInput, out int sharesToBuy) || sharesToBuy <= 0)
                 return;
 
-            double totalCost = shares * price;
+            double totalCost = sharesToBuy * price;
 
             var dbService = LocalDataService.GetLocalDataService();
             string currentUserId = Preferences.Get("UserId", "UnknownID");
@@ -344,7 +360,7 @@ namespace ProjectCompScience.ViewModels
             }
 
             bool confirm = await Shell.Current.DisplayAlert("Confirm Purchase",
-                $"Buy {shares} shares of {Ticker} for ${totalCost:F2}?\n\nRemaining Balance: ${(balance - totalCost):F2}",
+                $"Buy {sharesToBuy} shares of {Ticker} for ${totalCost:F2}?\n\nRemaining Balance: ${(balance - totalCost):F2}",
                 "CONFIRM BUY", "CANCEL");
 
             if (!confirm) return;
@@ -360,7 +376,7 @@ namespace ProjectCompScience.ViewModels
                 Ticker = Ticker,
                 CompanyName = CompanyName,
                 TransactionType = "BUY",
-                Shares = shares,
+                Shares = sharesToBuy,
                 PricePerShare = price,
                 TotalAmount = totalCost,
                 Date = DateTime.UtcNow
@@ -368,11 +384,14 @@ namespace ProjectCompScience.ViewModels
 
             await dbService.RecordTransactionAsync(currentUserId, transaction);
 
+            int existingShares = await dbService.GetOwnedSharesAsync(currentUserId, Ticker);
+            int newTotalShares = existingShares + sharesToBuy;
+
             var portfolioUpdate = new PortfolioItem
             {
                 Ticker = Ticker,
                 CompanyName = CompanyName,
-                TotalShares = shares,
+                TotalShares = newTotalShares, 
                 AveragePurchasePrice = price
             };
             await dbService.UpdatePortfolioAsync(currentUserId, portfolioUpdate);
@@ -380,22 +399,12 @@ namespace ProjectCompScience.ViewModels
             string receiptMessage =
                 $"Transaction ID: #{newTransactionId}\n" +
                 $"Stock: {CompanyName} ({Ticker})\n" +
-                $"Shares Bought: {shares}\n" +
+                $"Shares Bought: {sharesToBuy}\n" +
                 $"Price Per Share: ${price:F2}\n" +
                 $"Total Cost: ${totalCost:F2}\n\n" +
                 $"Remaining Balance: ${(balance - totalCost):F2}";
 
             await Shell.Current.DisplayAlert("Trade Successful!", receiptMessage, "CLOSE");
-
-            string userEmailAddress = dbService.fullDetaillsLoggedInUser?.Email;
-
-            if (!string.IsNullOrEmpty(userEmailAddress))
-            {
-                _ = Email_service.SendReceiptAsync(
-                    userEmailAddress,
-                    $"Trade Confirmation: {shares} shares of {Ticker}",
-                    $"Thank you for your purchase!\n\n{receiptMessage}\n\nHappy Trading!");
-            }
         }
 
         private async Task ExecuteSellStockAsync()
@@ -457,14 +466,24 @@ namespace ProjectCompScience.ViewModels
             };
             await dbService.RecordTransactionAsync(currentUserId, transaction);
 
-            var portfolioUpdate = new PortfolioItem
+            if (sharesToSell == ownedShares)
             {
-                Ticker = Ticker,
-                CompanyName = CompanyName,
-                TotalShares = -sharesToSell,
-                AveragePurchasePrice = price
-            };
-            await dbService.UpdatePortfolioAsync(currentUserId, portfolioUpdate);
+                await dbService.RemovePortfolioItemAsync(currentUserId, Ticker);
+                IsFromPortfolio = false;
+            }
+            else
+            {
+                int remainingShares = ownedShares - sharesToSell;
+
+                var portfolioUpdate = new PortfolioItem
+                {
+                    Ticker = Ticker,
+                    CompanyName = CompanyName,
+                    TotalShares = remainingShares,
+                    AveragePurchasePrice = price
+                };
+                await dbService.UpdatePortfolioAsync(currentUserId, portfolioUpdate);
+            }
 
             string receiptMessage =
                 $"Transaction ID: #{newTransactionId}\n" +
@@ -475,16 +494,9 @@ namespace ProjectCompScience.ViewModels
                 $"New Balance: ${newBalance:F2}";
 
             await Shell.Current.DisplayAlert("Sale Successful!", receiptMessage, "CLOSE");
-
-            string userEmailAddress = dbService.fullDetaillsLoggedInUser?.Email;
-            if (!string.IsNullOrEmpty(userEmailAddress))
-            {
-                _ = Email_service.SendReceiptAsync(
-                    userEmailAddress,
-                    $"Trade Confirmation: Sold {sharesToSell} shares of {Ticker}",
-                    $"Your sale was successfully executed!\n\n{receiptMessage}\n\nHappy Trading!");
-            }
         }
+
+
         #endregion
     }
 }

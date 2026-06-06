@@ -33,7 +33,6 @@ namespace ProjectCompScience.Services
         #endregion
 
         #region properties
-        public List<StockShare> stockShares = new List<StockShare>();
 
         FirebaseAuthClient? auth;
         public FirebaseClient? client;

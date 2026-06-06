@@ -17,70 +17,75 @@
             <BoxView Color="Lime" AbsoluteLayout.LayoutBounds="0,0.8,1,1" AbsoluteLayout.LayoutFlags="PositionProportional, WidthProportional"/>
         </AbsoluteLayout>
 
-        <ScrollView>
-            <Border MaximumWidthRequest="450" 
-                    HorizontalOptions="Center" 
-                    VerticalOptions="Center"
-                    BackgroundColor="#222222"
-                    Stroke="#333333"
-                    StrokeThickness="1"
-                    Padding="40"
-                    Margin="20,50">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="12" />
-                </Border.StrokeShape>
+        <ScrollView x:Name="MainScroll" VerticalOptions="Fill">
 
-                <VerticalStackLayout Spacing="15">
-                    <Label Text="REGISTER" FontSize="28" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" Margin="0,0,0,20"/>
+            <Grid MinimumHeightRequest="{Binding Height, Source={x:Reference MainScroll}}">
 
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="FULL NAME" TextColor="#A0A0A0" FontSize="11" />
-                        <Border Style="{StaticResource InputContainer}">
-                            <Entry Text="{Binding FullName}" Style="{StaticResource ModernEntry}" Placeholder="John Doe"/>
-                        </Border>
-                        <Label Text="{Binding ErrorLabelNameText}" Style="{StaticResource ErrorLabelStyle}"/>
+                <Border MaximumWidthRequest="450" 
+                        MinimumWidthRequest="320"
+                        HorizontalOptions="Center" 
+                        VerticalOptions="Center"
+                        BackgroundColor="#222222"
+                        Stroke="#333333"
+                        StrokeThickness="1"
+                        Padding="40"
+                        Margin="20,20">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="12" />
+                    </Border.StrokeShape>
+
+                    <VerticalStackLayout Spacing="15">
+                        <Label Text="REGISTER" FontSize="28" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" Margin="0,0,0,20"/>
+
+                        <VerticalStackLayout Spacing="5">
+                            <Label Text="FULL NAME" TextColor="#A0A0A0" FontSize="11" />
+                            <Border Style="{StaticResource InputContainer}">
+                                <Entry Text="{Binding FullName}" Style="{StaticResource ModernEntry}" Placeholder="John Doe"/>
+                            </Border>
+                            <Label Text="{Binding ErrorLabelNameText}" Style="{StaticResource ErrorLabelStyle}"/>
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Spacing="5">
+                            <Label Text="EMAIL ADDRESS" TextColor="#A0A0A0" FontSize="11" />
+                            <Border Style="{StaticResource InputContainer}">
+                                <Entry Text="{Binding EmailInput}" Style="{StaticResource ModernEntry}" Placeholder="email@example.com"/>
+                            </Border>
+                            <Label Text="{Binding ErrorLabelEmailField}" Style="{StaticResource ErrorLabelStyle}" />
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Spacing="5">
+                            <Label Text="PASSWORD" TextColor="#A0A0A0" FontSize="11" />
+
+                            <Border Style="{StaticResource InputContainer}">
+                                <Grid ColumnDefinitions="*,Auto">
+
+                                    <Entry Grid.Column="0" 
+                                           Text="{Binding PasswordInput1}" 
+                                           Style="{StaticResource ModernEntry}" 
+                                           IsPassword="{Binding IsVisiblePasswordField}" 
+                                           Placeholder="••••••••" />
+
+                                    <Button Grid.Column="1"
+                                            Command="{Binding ButtonShowPasswordCommand}" 
+                                            Text="{Binding ViewButtonText}" 
+                                            BackgroundColor="Transparent" 
+                                            TextColor="#A0A0A0" 
+                                            FontSize="10" 
+                                            BorderWidth="0" 
+                                            Padding="15,0" 
+                                            Margin="0"/>
+                                </Grid>
+                            </Border>
+
+                            <Label Text="{Binding ErrorLabelPasswordField}" Style="{StaticResource ErrorLabelStyle}" />
+                        </VerticalStackLayout>
+
+                        <Button Text="REGISTER" Command="{Binding SubmitRegisterCommand}" Style="{StaticResource PrimaryButton}" Margin="0,20,0,0"/>
+
+                        <Button BackgroundColor="Transparent" TextColor="#4CAF50" Command="{Binding GoLoginCommand}" Text="Already have an account? Login"/>
                     </VerticalStackLayout>
-
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="EMAIL ADDRESS" TextColor="#A0A0A0" FontSize="11" />
-                        <Border Style="{StaticResource InputContainer}">
-                            <Entry Text="{Binding EmailInput}" Style="{StaticResource ModernEntry}" Placeholder="email@example.com"/>
-                        </Border>
-                        <Label Text="{Binding ErrorLabelEmailField}" Style="{StaticResource ErrorLabelStyle}" />
-                    </VerticalStackLayout>
-
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="PASSWORD" TextColor="#A0A0A0" FontSize="11" />
-
-                        <Border Style="{StaticResource InputContainer}">
-                            <Grid ColumnDefinitions="*,Auto">
-
-                                <Entry Grid.Column="0" 
-                   Text="{Binding PasswordInput1}" 
-                   Style="{StaticResource ModernEntry}" 
-                   IsPassword="{Binding IsVisiblePasswordField}" 
-                   Placeholder="••••••••" />
-
-                                <Button Grid.Column="1" 
-                    Command="{Binding ButtonShowPasswordCommand}" 
-                    Text="VIEW" 
-                    BackgroundColor="Transparent" 
-                    TextColor="#A0A0A0" 
-                    FontSize="10" 
-                    BorderWidth="0" 
-                    Padding="15,0" 
-                    Margin="0"/>
-                            </Grid>
-                        </Border>
-
-                        <Label Text="{Binding ErrorLabelPasswordField}" Style="{StaticResource ErrorLabelStyle}" />
-                    </VerticalStackLayout>
-
-                    <Button Text="REGISTER" Command="{Binding SubmitRegisterCommand}" Style="{StaticResource PrimaryButton}" Margin="0,20,0,0"/>
-
-                    <Button BackgroundColor="Transparent" TextColor="#4CAF50" Command="{Binding GoLoginCommand}" Text="Already have an account? Login"/>
-                </VerticalStackLayout>
-            </Border>
+                </Border>
+            </Grid>
         </ScrollView>
     </Grid>
 </ContentPage>

@@ -49,12 +49,12 @@
                                     <Entry Grid.Column="0" 
                                            Text="{Binding PasswordInput}" 
                                            Style="{StaticResource ModernEntry}" 
-                                           IsPassword="True" 
+                                           IsPassword="{Binding IsPasswordHidden}" 
                                            Placeholder="••••••••" />
 
                                     <Button Grid.Column="1" 
                                             Command="{Binding ButtonShowPasswordCommand}" 
-                                            Text="VIEW" 
+                                            Text="{Binding ViewButtonText}" 
                                             BackgroundColor="Transparent" 
                                             TextColor="#A0A0A0" 
                                             FontSize="10" 

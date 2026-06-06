@@ -9,4 +9,6 @@ public partial class BuyShares : ContentPage
 		InitializeComponent();
         BindingContext = new ViewModelBuyShares();
     }
+
+
 }

@@ -19,6 +19,7 @@ namespace ProjectCompScience.ViewModels
         private string errorLabelPasswordField;
         private bool isVisiblePasswordField = true;
         private bool isBusy;
+        public string ViewButtonText => IsVisiblePasswordField ? "VIEW" : "HIDE";
         #endregion
 
         #region Properties
@@ -43,7 +44,9 @@ namespace ProjectCompScience.ViewModels
         public bool IsVisiblePasswordField
         {
             get => isVisiblePasswordField;
-            set { isVisiblePasswordField = value; OnPropertyChanged(); }
+            set { isVisiblePasswordField = value; OnPropertyChanged();
+                OnPropertyChanged(nameof(ViewButtonText));
+            }
         }
 
         public string ErrorLabelNameText

@@ -10,6 +10,10 @@ namespace ProjectCompScience.ViewModels
 {
     internal class ViewModelLoginPage : ViewModelBase
     {
+        #region propetries
+        public string ViewButtonText => IsPasswordHidden ? "VIEW" : "HIDE";
+        #endregion
+
         #region Getters & Setters
         private string emailInput;
         public string EmailInput
@@ -18,6 +22,12 @@ namespace ProjectCompScience.ViewModels
             set { emailInput = value; }
         }
 
+        private bool isPasswordHidden = true;
+        public bool IsPasswordHidden
+        {
+            get { return isPasswordHidden; }
+            set { isPasswordHidden = value; OnPropertyChanged(); OnPropertyChanged(nameof(ViewButtonText)); }
+        }
         private string passwordInput;
         public string PasswordInput
         {
@@ -36,7 +46,9 @@ namespace ProjectCompScience.ViewModels
         #region Commands Declaration
         public ICommand SubmitLoginCommand { get; set; }
         public ICommand GoRegisterCommand { get; set; }
+        public ICommand ButtonShowPasswordCommand { get; set; }
         #endregion
+
 
         #region Constructor
         public ViewModelLoginPage()
@@ -44,6 +56,10 @@ namespace ProjectCompScience.ViewModels
             EmailInput = "supermike@gmail.com";
             SubmitLoginCommand = new Command(async () => await Login());
             GoRegisterCommand = new Command(async () => await Shell.Current.GoToAsync("//Register"));
+            ButtonShowPasswordCommand = new Command(() =>
+            {
+                IsPasswordHidden = !IsPasswordHidden;
+            });
         }
         #endregion
 
