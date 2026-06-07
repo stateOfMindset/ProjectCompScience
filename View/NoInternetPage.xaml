@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ProjectCompScience.View.NoInternetPage"
+             Title="NoInternetPage"
+              Shell.NavBarIsVisible="False">
+    <Grid>
+        <!--  Semi-transparent grey overlay  -->
+        <BoxView
+            BackgroundColor="#AA808080"
+            HorizontalOptions="Fill"
+            VerticalOptions="Fill" />
+
+        <!--  Centered message card  -->
+        <Frame
+            Padding="30"
+            BackgroundColor="White"
+            CornerRadius="16"
+            HasShadow="True"
+            HorizontalOptions="Center"
+            MaximumWidthRequest="320"
+            VerticalOptions="Center">
+            <VerticalStackLayout HorizontalOptions="Center" Spacing="20">
+
+                <Label
+                    FontSize="50"
+                    HorizontalOptions="Center"
+                    Text="📡" />
+
+                <Label
+                    FontAttributes="Bold"
+                    FontSize="18"
+                    HorizontalOptions="Center"
+                    HorizontalTextAlignment="Center"
+                    Text="Application can't work without Internet"
+                    TextColor="#333333" />
+
+                <Label
+                    FontSize="14"
+                    HorizontalOptions="Center"
+                    HorizontalTextAlignment="Center"
+                    Text="Please check your network connection and try again."
+                    TextColor="#888888" />
+
+            </VerticalStackLayout>
+        </Frame>
+    </Grid>
+</ContentPage>

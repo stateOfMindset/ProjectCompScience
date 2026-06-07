@@ -93,6 +93,9 @@
 	  <MauiXaml Update="View\Login.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="View\NoInternetPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="View\Register.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

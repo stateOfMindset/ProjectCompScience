@@ -1,5 +1,6 @@
 ﻿using ProjectCompScience.View;
 using System.IO;
+using ProjectCompScience.Services;
 
 namespace ProjectCompScience
 {
@@ -9,13 +10,12 @@ namespace ProjectCompScience
         {
             try
             {
-                InitializeComponent();
-                //Connectivity.Current.ConnectivityChanged += OnConnectivityChanged;
+                InitializeComponent();               
                 MainPage = new ShellNotAuth();
+                ConnectionService.GetInstance();
             }
             catch (System.IO.FileNotFoundException fnfEx)
             {
-                // This will print the EXACT name of the missing file to your Output window
                 System.Diagnostics.Debug.WriteLine($"\n\n🚨 CRITICAL MISSING FILE: {fnfEx.FileName} 🚨\n\n");
             }
             catch (Exception ex)
@@ -24,6 +24,8 @@ namespace ProjectCompScience
                 System.Diagnostics.Debug.WriteLine($"INNER EXCEPTION: {ex.InnerException?.Message}");
             }
         }
+
+       
 
         public void SetAuthenticatedShell()
         {
